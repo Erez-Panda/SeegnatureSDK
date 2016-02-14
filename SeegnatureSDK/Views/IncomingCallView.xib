@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9531" systemVersion="14F1021" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <viewController storyboardIdentifier="IncomingCall" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Wr1-og-wKV" customClass="IncomingCallViewController" customModule="SeegnatureSDK" customModuleProvider="target">
+            <layoutGuides>
+                <viewControllerLayoutGuide type="top" id="Agd-hr-ot9"/>
+                <viewControllerLayoutGuide type="bottom" id="gbu-8m-4JC"/>
+            </layoutGuides>
+            <view key="view" contentMode="scaleToFill" id="3qC-0o-st3">
+                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                <subviews>
+                    <imageView userInteractionEnabled="NO" contentMode="bottom" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="incoming_reps_avatar" translatesAutoresizingMaskIntoConstraints="NO" id="uT3-gp-DfR">
+                        <rect key="frame" x="225" y="149" width="150" height="150"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="150" id="5j0-c2-dSw"/>
+                            <constraint firstAttribute="height" constant="150" id="KE0-0a-qN6"/>
+                        </constraints>
+                    </imageView>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="73W-lg-xVp" userLabel="Answer" customClass="NIKFontAwesomeButton">
+                        <rect key="frame" x="0.0" y="500" width="300" height="100"/>
+                        <color key="backgroundColor" red="0.1333333333" green="0.12941176469999999" blue="0.1529411765" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <inset key="contentEdgeInsets" minX="10" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        <inset key="titleEdgeInsets" minX="10" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        <inset key="imageEdgeInsets" minX="-10" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        <state key="normal" title="Answer" image="audio_incoming">
+                            <color key="titleColor" red="0.4039215686" green="0.79215686269999996" blue="0.58039215690000001" alpha="1" colorSpace="calibratedRGB"/>
+                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                        </state>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="iconHex" value="f095"/>
+                            <userDefinedRuntimeAttribute type="number" keyPath="size">
+                                <real key="value" value="30"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="color" keyPath="color">
+                                <color key="value" red="0.40392156862745099" green="0.792156862745098" blue="0.58039215686274503" alpha="1" colorSpace="calibratedRGB"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                        <connections>
+                            <action selector="startCall:" destination="Wr1-og-wKV" eventType="touchUpInside" id="RM7-5i-LaD"/>
+                        </connections>
+                    </button>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cE3-tN-46r" userLabel="Decline" customClass="NIKFontAwesomeButton">
+                        <rect key="frame" x="301" y="500" width="300" height="100"/>
+                        <color key="backgroundColor" red="0.1333333333" green="0.12941176469999999" blue="0.1529411765" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <state key="normal" title="Decline" image="decline_incoming">
+                            <color key="titleColor" red="0.98431378599999997" green="0.054901964960000001" blue="0.10588236149999999" alpha="1" colorSpace="deviceRGB"/>
+                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                        </state>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="iconHex" value=" f017"/>
+                            <userDefinedRuntimeAttribute type="color" keyPath="color">
+                                <color key="value" red="0.98431378599999997" green="0.054901964960000001" blue="0.10588236149999999" alpha="0.75" colorSpace="deviceRGB"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="number" keyPath="size">
+                                <real key="value" value="40"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="number" keyPath="edgeInsetRight">
+                                <real key="value" value="10"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                        <connections>
+                            <action selector="closeSelf:" destination="Wr1-og-wKV" eventType="touchUpInside" id="9Uk-Au-FF3"/>
+                        </connections>
+                    </button>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Rep Name" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cQU-Tu-Aee">
+                        <rect key="frame" x="0.0" y="80" width="600" height="29"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <textView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" bounces="NO" scrollEnabled="NO" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" delaysContentTouches="NO" canCancelContentTouches="NO" bouncesZoom="NO" editable="NO" text="is ready to start call" textAlignment="center" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dPk-eT-MXE">
+                        <rect key="frame" x="170" y="329" width="261" height="121"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="121" id="1T2-fZ-uBF"/>
+                            <constraint firstAttribute="width" constant="261" id="bBX-xf-e11"/>
+                        </constraints>
+                        <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="23"/>
+                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                    </textView>
+                </subviews>
+                <color key="backgroundColor" red="0.20784313730000001" green="0.21176470589999999" blue="0.28235294119999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                <constraints>
+                    <constraint firstAttribute="width" secondItem="73W-lg-xVp" secondAttribute="width" multiplier="2:1" id="3bK-N6-PEM"/>
+                    <constraint firstItem="gbu-8m-4JC" firstAttribute="top" secondItem="cE3-tN-46r" secondAttribute="bottom" id="G8K-sv-XCT"/>
+                    <constraint firstItem="73W-lg-xVp" firstAttribute="height" secondItem="cE3-tN-46r" secondAttribute="height" id="GYP-9q-GZ1"/>
+                    <constraint firstItem="cQU-Tu-Aee" firstAttribute="top" secondItem="Agd-hr-ot9" secondAttribute="bottom" constant="60" id="MzY-2a-H1z"/>
+                    <constraint firstAttribute="centerX" secondItem="uT3-gp-DfR" secondAttribute="centerX" id="Rab-AS-kns"/>
+                    <constraint firstAttribute="width" secondItem="cQU-Tu-Aee" secondAttribute="width" id="S0P-Gm-UPR"/>
+                    <constraint firstAttribute="centerX" secondItem="cQU-Tu-Aee" secondAttribute="centerX" constant="-0.5" id="amY-7q-OqZ"/>
+                    <constraint firstItem="dPk-eT-MXE" firstAttribute="centerX" secondItem="uT3-gp-DfR" secondAttribute="centerX" id="fGN-Ow-hYE"/>
+                    <constraint firstItem="cE3-tN-46r" firstAttribute="leading" secondItem="73W-lg-xVp" secondAttribute="trailing" constant="1" id="g2U-3p-NFE"/>
+                    <constraint firstItem="uT3-gp-DfR" firstAttribute="top" secondItem="cQU-Tu-Aee" secondAttribute="bottom" constant="40" id="ggy-nZ-Jf9"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="cE3-tN-46r" secondAttribute="trailing" constant="-17" id="huI-Wj-KMF"/>
+                    <constraint firstItem="cE3-tN-46r" firstAttribute="trailing" secondItem="cQU-Tu-Aee" secondAttribute="trailing" constant="1" id="j17-sU-HMq"/>
+                    <constraint firstAttribute="height" secondItem="73W-lg-xVp" secondAttribute="height" multiplier="6:1" id="tLb-76-5sj"/>
+                    <constraint firstItem="73W-lg-xVp" firstAttribute="leading" secondItem="cQU-Tu-Aee" secondAttribute="leading" id="tfR-Ue-B0O"/>
+                    <constraint firstItem="dPk-eT-MXE" firstAttribute="top" secondItem="uT3-gp-DfR" secondAttribute="bottom" constant="30" id="uks-7U-SHs"/>
+                    <constraint firstItem="73W-lg-xVp" firstAttribute="width" secondItem="cE3-tN-46r" secondAttribute="width" id="w5J-CM-JkI"/>
+                    <constraint firstItem="gbu-8m-4JC" firstAttribute="top" secondItem="73W-lg-xVp" secondAttribute="bottom" id="w9t-bz-bhI"/>
+                    <constraint firstItem="73W-lg-xVp" firstAttribute="leading" secondItem="3qC-0o-st3" secondAttribute="leadingMargin" constant="-16" id="ydf-No-Lop"/>
+                </constraints>
+                <variation key="default">
+                    <mask key="constraints">
+                        <exclude reference="ydf-No-Lop"/>
+                        <exclude reference="huI-Wj-KMF"/>
+                    </mask>
+                </variation>
+            </view>
+            <connections>
+                <outlet property="callerImage" destination="uT3-gp-DfR" id="HcO-lG-mja"/>
+                <outlet property="callerName" destination="cQU-Tu-Aee" id="Jvl-MD-LQY"/>
+                <outlet property="drugTextView" destination="dPk-eT-MXE" id="FQL-Bg-bck"/>
+            </connections>
+            <point key="canvasLocation" x="-43" y="-2030"/>
+        </viewController>
+    </objects>
+    <resources>
+        <image name="audio_incoming" width="34" height="34"/>
+        <image name="decline_incoming" width="39" height="16"/>
+        <image name="incoming_reps_avatar" width="80" height="106"/>
+    </resources>
+</document>
