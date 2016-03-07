@@ -39,5 +39,11 @@ struct NetworkUtils {
         }
         return true
     }
+    
+    static func getDataFromUrl(urL:NSURL, completion: ((data: NSData?) -> Void)) {
+        NSURLSession.sharedSession().dataTaskWithURL(urL) { (data, response, error) in
+            completion(data: data)
+            }.resume()
+    }
 }
 

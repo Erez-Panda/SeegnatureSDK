@@ -9,6 +9,33 @@
 import Foundation
 import UIKit
 
+//func printLog(text: AnyObject) {
+func printLog(logMessage: AnyObject, functionName: String = __FUNCTION__) {
+    print("----------------------------------")
+    print("\(functionName): \(logMessage)")
+    print("----------------------------------")
+}
+
+enum SignalsType : String{
+    case Send_Meta_Data = "send_meta_data"
+    case Load_Res_With_Index = "load_res_with_index"
+    case Preload_Res_With_Index = "preload_res_with_index"
+    case Chat_Text = "chat_text"
+    case Line_Start_Point = "line_start_point"
+    case Line_Point = "line_point"
+    case Line_Clear = "line_clear"
+    case Pointer_Position = "pointer_position"
+    case Pointer_Hide = "pointer_hide"
+    case Zoom_Scale = "zoom_scale"
+    case Signature_Points = "signature_points"
+    case Add_Text = "add_text"
+    case Ask_For_Photo = "ask_for_photo"
+    case Translate_And_Scale = "translate_and_scale"
+    case Open_Rep_Box = "mouse_pos"
+    case Text_Font_Change = "text_font_change"
+}
+
+
 extension UIView {
     
     func addBorder(borderColor: UIColor, borderWidth: CGFloat = 1) {
@@ -44,19 +71,49 @@ extension UIView {
         return result
     }
     
-    func addSizeConstaints (view: UIView, width: CGFloat?, height: CGFloat?) -> Array<NSLayoutConstraint>{
-        view.translatesAutoresizingMaskIntoConstraints = false
+    func addSizeConstaints (width: CGFloat?, height: CGFloat?) -> Array<NSLayoutConstraint>{
+        self.translatesAutoresizingMaskIntoConstraints = false
         var widthConstraint:NSLayoutConstraint = NSLayoutConstraint()
         var hightConstraint:NSLayoutConstraint = NSLayoutConstraint()
         if let w = width {
-            widthConstraint = NSLayoutConstraint(item: view, attribute: NSLayoutAttribute.Width, relatedBy: NSLayoutRelation.Equal, toItem: nil, attribute: NSLayoutAttribute.NotAnAttribute, multiplier: 1, constant: w)
-            view.addConstraint(widthConstraint)
+            widthConstraint = NSLayoutConstraint(item: self, attribute: NSLayoutAttribute.Width, relatedBy: NSLayoutRelation.Equal, toItem: nil, attribute: NSLayoutAttribute.NotAnAttribute, multiplier: 1, constant: w)
+            self.addConstraint(widthConstraint)
         }
         if let h = height {
-            hightConstraint = NSLayoutConstraint(item: view, attribute: NSLayoutAttribute.Height, relatedBy: NSLayoutRelation.Equal, toItem: nil, attribute: NSLayoutAttribute.NotAnAttribute, multiplier: 1, constant: h)
-            view.addConstraint(hightConstraint)
+            hightConstraint = NSLayoutConstraint(item: self, attribute: NSLayoutAttribute.Height, relatedBy: NSLayoutRelation.Equal, toItem: nil, attribute: NSLayoutAttribute.NotAnAttribute, multiplier: 1, constant: h)
+            self.addConstraint(hightConstraint)
         }
         return [widthConstraint, hightConstraint]
+    }
+    
+    func setConstraintesToCenterSuperView(superView: UIView) ->Array<NSLayoutConstraint> {
+        let centerXConstraint = NSLayoutConstraint(item: self, attribute: NSLayoutAttribute.CenterX, relatedBy: NSLayoutRelation.Equal, toItem: superView, attribute: NSLayoutAttribute.CenterX, multiplier: 1, constant: 0)
+        superView.addConstraint(centerXConstraint)
+        let centerYConstraint = NSLayoutConstraint(item: self, attribute: NSLayoutAttribute.CenterY, relatedBy: NSLayoutRelation.Equal, toItem: superView, attribute: NSLayoutAttribute.CenterY, multiplier: 1, constant: 0)
+        superView.addConstraint(centerYConstraint)
+        return [centerXConstraint, centerYConstraint]
+    }
+    
+    func attachToView(superView: UIView){
+        superView.addSubview(self)
+        self.addConstraintsToSuperview(superView, top: 0, left: 0, bottom: 0, right: 0)
+    }
+    
+    var parentViewController: UIViewController? {
+        var parentResponder: UIResponder? = self
+        while parentResponder != nil {
+            parentResponder = parentResponder!.nextResponder()
+            if let viewController = parentResponder as? UIViewController {
+                return viewController
+            }
+        }
+        return nil
+    }
+}
+
+extension String {
+    var floatValue: Float {
+        return (self as NSString).floatValue
     }
 }
 
@@ -96,3 +153,15 @@ extension UIImage {
     }
 }
 
+public func getTopViewController() -> UIViewController? {
+    if var topController = UIApplication.sharedApplication().keyWindow?.rootViewController {
+        while let presentedViewController = topController.presentedViewController {
+            topController = presentedViewController
+        }
+        
+        return topController
+        
+    } else {
+        return nil
+    }
+}

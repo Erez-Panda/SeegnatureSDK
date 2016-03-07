@@ -40,7 +40,7 @@ class UpcomingCallViewController: PandaViewController, CallDelegate {
         startOnTimeButton.setAttributedTitle(ViewUtils.getAttrText("Start on time", color: ColorUtils.buttonColor(), size: 18.0), forState: UIControlState.Normal)
         
         timer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(1), target: self, selector: Selector("updateTime"), userInfo: AnyObject?(), repeats: true)
-        CallUtils.delegate = self
+//        CallUtils.delegate = self
         if(CallUtils.isRemoteSideConnected()){
             self.remoteSideConnected()
         }

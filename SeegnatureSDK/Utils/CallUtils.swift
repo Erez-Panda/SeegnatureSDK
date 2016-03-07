@@ -31,7 +31,8 @@ struct CallUtils{
     static var sessionDelegate : OTSessionDelegate?
     static var subscriberDelegate : OTSubscriberKitDelegate?
     static var publisherDelegate : OTPublisherDelegate?
-    static var delegate:CallDelegate?
+//    static var delegate:CallDelegate?
+    static var delegate:Session?
     static var remoteSideConnect = false
     static var callViewController: UIViewController?
     static var incomingViewController : UIViewController?
@@ -73,11 +74,13 @@ struct CallUtils{
     }
     
     static func remoteSideConnected(){
+        printLog("remote side connected")
         remoteSideConnect = true
-        self.delegate?.remoteSideConnected!()
+//        self.delegate?.remoteSideConnected!()
     }
     
     static func didConnectToSession(){
+        printLog("connected to session")
         isConnectedToSession = true
         if connectionCallback != nil{
             connectionCallback!(result: true)
@@ -86,29 +89,15 @@ struct CallUtils{
     
     static func whenConnected(completion: (result: Bool) -> Void){
         if isConnectedToSession {
+            printLog("true")
             completion(result: true)
         } else {
+            printLog("false")
             connectionCallback = completion
         }
     }
     
-    
-    // MARK: TODO -------------------------------------------
-    
-    
-    /*
 
-    static func getCallViewController() -> CallNewViewController?{
-        return callViewController as? CallNewViewController
-    }
-    
-    static func getRepCallViewController() -> RepCallNewViewController?{
-        return callViewController as? RepCallNewViewController
-    }
-    
-    */
-    
-    
     static func getCallerImage(){
         if let caller = CallUtils.currentCall?["caller"] as? NSDictionary{
             if let imageFileId = caller["image_file"] as? NSNumber{
@@ -127,7 +116,7 @@ struct CallUtils{
             self.getCallerImage()
             // Step 1: As the view is loaded initialize a new instance of OTSession
             if let call = self.currentCall?["session"] as? String{
-                CallUtils.initCall(call, token: self.currentCall?["token"] as! String, delegate: delegateViewController)
+                CallUtils.initCall(call, token: self.currentCall?["token"] as! String)
                 completion(result: self.currentCall!)
                 
             } else{
@@ -135,29 +124,12 @@ struct CallUtils{
             }
         })
     }
-    
-    static func connectToCallSessionById(id:String, delegateViewController: UIViewController, completion: (result: NSDictionary) -> Void) -> Void{
-        callViewController = delegateViewController
-        ServerAPI.sharedInstance.getCallById( id, completion: {result -> Void in
-            self.currentCall = result
-            self.getCallerImage()
-            if let call = self.currentCall?["session"] as? String{
-                CallUtils.initCall(call, token: self.currentCall?["token"] as! String, delegate: delegateViewController)
-                
-                self.whenConnected({ (result) -> Void in
-                    completion(result: self.currentCall!)
-                })
-            } else{
-                completion(result: [:])
-            }
-        })
-    }
-    
-    static func initCall(sessionId: String, token: String, delegate: AnyObject){
+
+    static func initCall(sessionId: String, token: String){
         self.token = token
-        self.sessionDelegate = delegate as? OTSessionDelegate
-        self.subscriberDelegate = delegate as? OTSubscriberKitDelegate
-        self.publisherDelegate = delegate as? OTPublisherDelegate
+        self.sessionDelegate = self.delegate as? OTSessionDelegate
+        self.subscriberDelegate = self.delegate as? OTSubscriberKitDelegate
+        self.publisherDelegate = self.delegate as? OTPublisherDelegate
         session = OTSession(apiKey: ApiKey, sessionId: sessionId, delegate: sessionDelegate)
         self.doConnect()
         
@@ -218,7 +190,7 @@ struct CallUtils{
      * binds to the device camera and microphone, and will provide A/V streams
      * to the OpenTok session.
      */
-    static func doPublish() {
+    static func doPublish() { // publish my screen
         publisher = OTPublisher(delegate: self.publisherDelegate)
         publisher?.publishVideo = false
         var maybeError : OTError?
@@ -228,24 +200,25 @@ struct CallUtils{
             ViewUtils.showAlert("OTError", message: error.localizedDescription)
         }
         
-        if (isFakeCall){
+        
+        if videoEnabled() { //if (isFakeCall){
             publisher?.publishVideo = true
         }
         
     }
     
     static func doScreenPublish(view: UIView) {
-        // MARK: TODO --------------------
-//        screenPublisher?.videoCapture = TBScreenCapture(view: view)
-//        //screenPublisher?.publishVideo = true
-//        var maybeError : OTError?
-//        session?.publish(screenPublisher, error: &maybeError)
-//        
-//        
-//        if let error = maybeError {
-//            ViewUtils.showAlert("OTError", message: error.localizedDescription)
-//        }
-//        
+
+        screenPublisher?.videoCapture = TBScreenCapture(view: view)
+        //screenPublisher?.publishVideo = true
+        var maybeError : OTError?
+        session?.publish(screenPublisher, error: &maybeError)
+        
+        
+        if let error = maybeError {
+            ViewUtils.showAlert("OTError", message: error.localizedDescription)
+        }
+        
     }
     
     static func doScreenSubscribe(stream : OTStream) {
@@ -277,7 +250,7 @@ struct CallUtils{
      * this method does not add the subscriber to the view hierarchy. Instead, we
      * add the subscriber only after it has connected and begins receiving data.
      */
-    static func doSubscribe(stream : OTStream) {
+    static func doSubscribe(stream : OTStream) { // subscribe to other user
         if let session = self.session {
             subscriber = OTSubscriber(stream: stream, delegate: self.subscriberDelegate)
             var maybeError : OTError?
@@ -341,15 +314,18 @@ struct CallUtils{
         }
     }
     
-    static func messageString2Dictionary(message: String) -> Dictionary<String, AnyObject>?{
-        if let data =  message.dataUsingEncoding(NSUTF8StringEncoding){
-            do{
-                let jsonObject = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions())
-                return jsonObject as? Dictionary<String, AnyObject>
+    static func convertStringToDictionary(text: String) -> [String:AnyObject]? {
+        if let data = text.dataUsingEncoding(NSUTF8StringEncoding) {
+            var json: [String:AnyObject]?
+            do {
+                json = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableLeaves) as? [String : AnyObject]
+            } catch let error as NSError {
+                printLog(error)
+                json = nil
+            } catch {
+                fatalError()
             }
-            catch{
-                
-            }
+            return json
         }
         return nil
     }

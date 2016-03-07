@@ -20,7 +20,7 @@ struct ViewUtils {
     static var globalLoader: UIActivityIndicatorView?
     
     static func roundView(view: UIView, borderWidth: CGFloat, borderColor: UIColor){
-        let frame =  view.frame;
+        let frame = view.frame;
         view.layer.cornerRadius = frame.size.height / 2
         view.clipsToBounds = true
         view.layer.borderWidth = borderWidth;
@@ -274,41 +274,16 @@ struct ViewUtils {
         return attrText
     }
     
-
-    static func addConstraintsToSuper(view: UIView, superView: UIView, top: CGFloat?, left: CGFloat?, bottom: CGFloat?, right: CGFloat?) -> Dictionary<String, NSLayoutConstraint> {
-        var result : Dictionary<String, NSLayoutConstraint> = [:]
-        view.translatesAutoresizingMaskIntoConstraints = false
-        if let t = top {
-            let topConstraint = NSLayoutConstraint(item: view, attribute: NSLayoutAttribute.Top, relatedBy: NSLayoutRelation.Equal, toItem: superView, attribute: NSLayoutAttribute.Top, multiplier: 1, constant: t)
-            superView.addConstraint(topConstraint)
-            result["top"] = topConstraint
-        }
-        if let l = left {
-            let leftConstraint = NSLayoutConstraint(item: view, attribute: NSLayoutAttribute.Leading, relatedBy: NSLayoutRelation.Equal, toItem: superView, attribute: NSLayoutAttribute.Leading, multiplier: 1, constant: l)
-            superView.addConstraint(leftConstraint)
-            result["left"] = leftConstraint
-        }
-        if let b = bottom {
-            let bottomConstraint = NSLayoutConstraint(item: view, attribute: NSLayoutAttribute.Bottom, relatedBy: NSLayoutRelation.Equal, toItem: superView, attribute: NSLayoutAttribute.Bottom, multiplier: 1, constant: b)
-            superView.addConstraint(bottomConstraint)
-            result["bottom"] = bottomConstraint
-        }
-        
-        if let r = right {
-            let rightConstraint = NSLayoutConstraint(item: view, attribute: NSLayoutAttribute.Right, relatedBy: NSLayoutRelation.Equal, toItem: superView, attribute: NSLayoutAttribute.Right, multiplier: 1, constant: r)
-            superView.addConstraint(rightConstraint)
-            result["right"] = rightConstraint
-        }
-        return result
-    }
-    
-    
     static func showSimpleError(message: String){
         showAlert("Error", message: message)
 
     }
     
     static func showAlert(title: String, message: String) {
+        if (Session.sharedInstance.disconnectingCall == true) {
+            return
+        }
+        
         let alertController = UIAlertController(title: "Error", message: message, preferredStyle: .Alert)
         
         let OKAction = UIAlertAction(title: "OK", style: .Default) { (action:UIAlertAction!) in
@@ -335,7 +310,6 @@ struct ViewUtils {
             topView.addConstraint(canterYConstraint)
             
         }
-        
         
     }
     

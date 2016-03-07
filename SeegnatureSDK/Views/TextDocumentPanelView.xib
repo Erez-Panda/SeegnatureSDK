@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9531" systemVersion="14F1021" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <mutableArray key="OpenSans-Bold.ttf">
+            <string>OpenSans-Bold</string>
+        </mutableArray>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" restorationIdentifier="SignDocumentPanelView" id="iN0-l3-epB" customClass="TextDocumentPanelView" customModule="SeegnatureSDK" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="495" height="200"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="D3I-ih-Es2">
+                    <rect key="frame" x="435" y="0.0" width="60" height="200"/>
+                    <color key="backgroundColor" red="0.4039215686" green="0.79215686269999996" blue="0.58039215690000001" alpha="1" colorSpace="calibratedRGB"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="60" id="u4b-qJ-YZT"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
+                    <state key="normal" title="Add">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="sign:" destination="iN0-l3-epB" eventType="touchUpInside" id="GtG-VA-6q4"/>
+                    </connections>
+                </button>
+                <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HBl-aO-F0p" userLabel="close" customClass="NIKFontAwesomeButton">
+                    <rect key="frame" x="465" y="-10" width="40" height="40"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="40" id="0PF-ZR-znp"/>
+                        <constraint firstAttribute="width" constant="40" id="eN2-sn-ElZ"/>
+                    </constraints>
+                    <state key="normal">
+                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="iconHex" value="f00d"/>
+                        <userDefinedRuntimeAttribute type="color" keyPath="color">
+                            <color key="value" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        </userDefinedRuntimeAttribute>
+                        <userDefinedRuntimeAttribute type="number" keyPath="size">
+                            <real key="value" value="20"/>
+                        </userDefinedRuntimeAttribute>
+                    </userDefinedRuntimeAttributes>
+                    <connections>
+                        <action selector="cancel:" destination="iN0-l3-epB" eventType="touchUpInside" id="Xyq-AO-uee"/>
+                    </connections>
+                </button>
+                <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hkD-re-f6Q" userLabel="Move" customClass="NIKFontAwesomeButton">
+                    <rect key="frame" x="0.0" y="0.0" width="44" height="199"/>
+                    <color key="backgroundColor" red="0.4039215686" green="0.79215686269999996" blue="0.58039215690000001" alpha="1" colorSpace="calibratedRGB"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="38" id="BWb-GT-DFT"/>
+                        <constraint firstAttribute="width" constant="44" id="h61-wz-cNe"/>
+                    </constraints>
+                    <state key="normal">
+                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="iconHex" value="f047"/>
+                        <userDefinedRuntimeAttribute type="color" keyPath="color">
+                            <color key="value" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        </userDefinedRuntimeAttribute>
+                        <userDefinedRuntimeAttribute type="number" keyPath="size">
+                            <real key="value" value="30"/>
+                        </userDefinedRuntimeAttribute>
+                    </userDefinedRuntimeAttributes>
+                    <variation key="default">
+                        <mask key="constraints">
+                            <exclude reference="BWb-GT-DFT"/>
+                        </mask>
+                    </variation>
+                </button>
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Type here" adjustsFontSizeToFit="NO" minimumFontSize="14" translatesAutoresizingMaskIntoConstraints="NO" id="M2w-Tg-Usm">
+                    <rect key="frame" x="59" y="82" width="371" height="36"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="30"/>
+                    <textInputTraits key="textInputTraits"/>
+                </textField>
+            </subviews>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="hkD-re-f6Q" secondAttribute="bottom" constant="1" id="4b3-Hd-e53"/>
+                <constraint firstAttribute="bottom" secondItem="M2w-Tg-Usm" secondAttribute="bottom" constant="3" id="Apz-7I-DkT"/>
+                <constraint firstItem="HBl-aO-F0p" firstAttribute="trailing" secondItem="D3I-ih-Es2" secondAttribute="trailing" constant="10" id="C8u-PH-ORX"/>
+                <constraint firstItem="D3I-ih-Es2" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="GKa-Wi-xye"/>
+                <constraint firstItem="M2w-Tg-Usm" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="HMZ-Ve-h9v"/>
+                <constraint firstItem="HBl-aO-F0p" firstAttribute="top" secondItem="D3I-ih-Es2" secondAttribute="top" constant="-10" id="KhG-P6-YhY"/>
+                <constraint firstAttribute="trailing" secondItem="D3I-ih-Es2" secondAttribute="trailing" id="PUS-1V-Xne"/>
+                <constraint firstItem="M2w-Tg-Usm" firstAttribute="leading" secondItem="hkD-re-f6Q" secondAttribute="trailing" constant="15" id="Ufo-vb-Ehg"/>
+                <constraint firstItem="D3I-ih-Es2" firstAttribute="leading" secondItem="M2w-Tg-Usm" secondAttribute="trailing" constant="5" id="ZnN-Gg-fH6"/>
+                <constraint firstAttribute="bottom" secondItem="D3I-ih-Es2" secondAttribute="bottom" id="baa-ZD-SEi"/>
+                <constraint firstItem="hkD-re-f6Q" firstAttribute="width" secondItem="D3I-ih-Es2" secondAttribute="width" multiplier="1:2" priority="500" id="dWo-pm-CCK"/>
+                <constraint firstItem="hkD-re-f6Q" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="h4l-v6-LEB"/>
+                <constraint firstItem="M2w-Tg-Usm" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="sJC-o2-sgR"/>
+                <constraint firstItem="M2w-Tg-Usm" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="t4h-b0-oX2"/>
+                <constraint firstItem="hkD-re-f6Q" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="xE0-hx-O0N"/>
+                <constraint firstItem="M2w-Tg-Usm" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="xEE-lr-TUb"/>
+                <constraint firstItem="M2w-Tg-Usm" firstAttribute="width" secondItem="D3I-ih-Es2" secondAttribute="width" multiplier="3:1" id="ynd-X5-0ww"/>
+            </constraints>
+            <nil key="simulatedStatusBarMetrics"/>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <variation key="default">
+                <mask key="constraints">
+                    <exclude reference="dWo-pm-CCK"/>
+                    <exclude reference="Apz-7I-DkT"/>
+                    <exclude reference="HMZ-Ve-h9v"/>
+                    <exclude reference="sJC-o2-sgR"/>
+                    <exclude reference="xEE-lr-TUb"/>
+                    <exclude reference="ynd-X5-0ww"/>
+                </mask>
+            </variation>
+            <connections>
+                <outlet property="textFieldView" destination="M2w-Tg-Usm" id="864-4Z-Aso"/>
+            </connections>
+            <point key="canvasLocation" x="293.5" y="261"/>
+        </view>
+    </objects>
+</document>

@@ -8,7 +8,8 @@
 
 import Foundation
 
-var SERVER_URL = "https://www.livemed.co"
+//var SERVER_URL = "https://www.seegnature.com"
+var SERVER_URL = "http://www.livemed-test.com"
 
 // MARK:
 
@@ -336,6 +337,11 @@ class ServerAPI {
         })
     }
     
+    func newModification(data: Dictionary<String, AnyObject>, completion: (result: NSDictionary) -> Void) -> Void{
+        self.http("/sign-documents/modifications/", message: data, method: .POST, completion: {result -> Void in
+            completion(result: self.getDictionaryResult(result))
+        })
+    }
     func getResourceDisplay(resourceId: NSNumber, completion: (result: NSArray) -> Void) -> Void{
         self.http("/resources/display/?resource=\(resourceId)", completion: {result -> Void in
             completion(result: self.getArrayResult(result))
@@ -411,10 +417,10 @@ class ServerAPI {
         let requestUrl = useURLPrefix ? SERVER_URL + url : url
         switch method{
         case .POST:
-            manager.POST(requestUrl, parameters: message, success: getResponseHandler(completion),failure: getErrorHandler(completion))
+            manager.POST(requestUrl, parameters: message, progress: nil, success: getResponseHandler(completion),failure: getErrorHandler(completion))
             break
         case .GET:
-            manager.GET(requestUrl, parameters: message, success: getResponseHandler(completion),failure: getErrorHandler(completion))
+            manager.GET(requestUrl, parameters: message, progress: nil, success: getResponseHandler(completion),failure: getErrorHandler(completion))
             break
         case .PATCH:
             manager.PATCH(requestUrl, parameters: message, success: getResponseHandler(completion),failure: getErrorHandler(completion))

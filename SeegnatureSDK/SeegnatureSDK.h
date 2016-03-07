@@ -26,6 +26,6 @@ FOUNDATION_EXPORT const unsigned char SeegnatureSDKVersionString[];
 #import "NIKFontAwesomeImageView.h"
 #import "NIKFontAwesomeTabBarItem.h"
 
-//#import "TBScreenCapture.h"
+#import "TBScreenCapture.h"
 
 

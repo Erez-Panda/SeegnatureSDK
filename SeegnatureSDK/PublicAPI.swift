@@ -1,5 +1,5 @@
 //
-//  Loader.swift
+//  SeegnatureActions.swift
 //  SeegnatureSDK
 //
 //  Created by Moshe Krush on 10/02/16.
@@ -7,22 +7,29 @@
 //
 
 import Foundation
-import OpenTok
 
 public class SeegnatureActions: NSObject {
-    
-    public func doSomething(){
-        print("Yeah, it works")
-//        var session = OTSession(apiKey: "45145512", sessionId: "abcd", delegate: nil)
-//        let manager = AFHTTPSessionManager()
-    }
-    
-    public func startSession(id: String, superView: UIView, user: String? = nil, completion: ((view: UIView) -> Void)? = nil) -> Void{
-            let documentView = NSBundle(forClass: SeegnatureActions.self).loadNibNamed("SessionView", owner: self, options: nil)[0] as! SessionView
-            documentView.attachToView(superView)
-//            documentView.user = user
-            completion?(view: documentView)
 
+    public func getSessionInfo(id: String, completion: (result: Bool) -> Void) {
+
+        Session.sharedInstance.getSessionInfo(id, completion:  { (result) -> Void in
+            if (result.count == 0) {
+                completion(result: false)
+            } else {
+                completion(result: true)
+            }
+        })
+        
+    }
+
+    public func startSession(superView: UIView, dictionary: NSDictionary, completion: () -> Void) {
+
+        Session.sharedInstance.handleSessioInfoResponse({ () -> Void in
+
+            Session.sharedInstance.capabilities = dictionary
+            Session.sharedInstance.loadView(superView)
+            completion()
+        })
     }
 
 }
