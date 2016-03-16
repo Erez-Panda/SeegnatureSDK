@@ -16,6 +16,8 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate {
     var center_x_constraint: NSLayoutConstraint?
     var center_y_constraint: NSLayoutConstraint?
     
+    var last_open_box_info: String?
+    
     @IBOutlet weak var textFieldView: UITextField!
     
     override func awakeFromNib() {
@@ -26,6 +28,19 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate {
         textFieldView.delegate = self
         textFieldView.addTarget(self, action: "textDidChange", forControlEvents: UIControlEvents.EditingChanged)
         self.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    override var hidden: Bool {
+        get {
+            return super.hidden
+        }
+        set(v) {
+            super.hidden = v
+            self.last_open_box_info = nil
+            if (self.textFieldView != nil) {
+                self.textFieldView.text = ""
+            }
+        }
     }
     
     func textDidChange(){

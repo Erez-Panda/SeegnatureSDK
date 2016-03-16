@@ -43,9 +43,11 @@ class ChatBoxView: UIView {
         timeLabel.textColor = UIColor(red:1, green:1, blue:1, alpha:0.5)
         timeLabel.font = UIFont(name: "OpenSans", size: 12.0 )
         
-        
-        tail.image = UIImage(named: leftAlign ? "other_chupchik" : "my_chupchik")
-        
+        if leftAlign == true {
+           tail.image = ViewUtils.loadUIImageNamed("other_chupchik")
+        } else {
+            tail.image = ViewUtils.loadUIImageNamed("my_chupchik")
+        }
         
         let screenSize: CGRect = UIScreen.mainScreen().bounds
         

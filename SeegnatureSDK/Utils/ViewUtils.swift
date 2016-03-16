@@ -122,11 +122,6 @@ struct ViewUtils {
         })
     }
     
-    
-    
-    
-    
-    
     static func getBlurEffect(view:UIView) -> UIImage{
         let snapshotView:UIView = view.snapshotViewAfterScreenUpdates(true)
         UIGraphicsBeginImageContextWithOptions(view.bounds.size, true, 0.0)
@@ -223,7 +218,9 @@ struct ViewUtils {
         }
         let backBtn   = UIButton(type: UIButtonType.Custom)
         backBtn.frame = CGRectMake(0, 0, 18, 16);
-        backBtn.setBackgroundImage(UIImage(named: "back_btn"), forState: UIControlState.Normal)
+        if let image = ViewUtils.loadUIImageNamed("back_btn") {
+            backBtn.setBackgroundImage(image, forState: UIControlState.Normal)
+        }
         backBtn.addTarget(vc, action: "back", forControlEvents: UIControlEvents.TouchUpInside)
         let backButton = UIBarButtonItem(customView: backBtn)
         backButton.tag = 10
@@ -236,7 +233,9 @@ struct ViewUtils {
         }
         let menuBtn   = UIButton(type: UIButtonType.Custom)
         menuBtn.frame = CGRectMake(0, 0, 20, 15);
-        menuBtn.setBackgroundImage(UIImage(named: "menu_btn"), forState: UIControlState.Normal)
+        if let image = ViewUtils.loadUIImageNamed("menu_btn") {
+            menuBtn.setBackgroundImage(image, forState: UIControlState.Normal)
+        }
         menuBtn.addTarget(vc, action: "menu", forControlEvents: UIControlEvents.TouchUpInside)
         let menuButton = UIBarButtonItem(customView: menuBtn)
         menuButton.tag = 10
@@ -276,7 +275,6 @@ struct ViewUtils {
     
     static func showSimpleError(message: String){
         showAlert("Error", message: message)
-
     }
     
     static func showAlert(title: String, message: String) {
@@ -319,34 +317,8 @@ struct ViewUtils {
         }
     }
     
-    
-    
-    /*
-    static func slideInMenu (viewController: UIViewController){
-        let menuView = viewController.storyboard?.instantiateViewControllerWithIdentifier("MenuViewController") as! MenuViewController
-        
-        let grayView = UIView()
-        grayView.frame = CGRectMake(0.0, 0.0, viewController.view.frame.width, viewController.view.frame.height)
-        grayView.backgroundColor = UIColor.blackColor()
-        grayView.alpha = 0.5
-        
-        
-        menuView.previousViewController = viewController
-        menuView.grayView = grayView
-        menuView.view.frame.origin.x = -1 * menuView.view.frame.size.width
-        let parent = viewController.parentViewController
-        parent?.addChildViewController(menuView)
-        parent?.view.addSubview(menuView.view)
-        parent?.view.addSubview(grayView)
-        parent?.view.bringSubviewToFront(menuView.view)
-        menuView.view.alpha = 0.0
-        UIView.animateWithDuration(0.5, animations: { () -> Void in
-            menuView.view.frame.origin.x = 0
-            menuView.view.alpha = 1
-            
-        })
+    static func loadUIImageNamed(name: String) -> UIImage? {
+        return UIImage(named: name, inBundle: NSBundle(forClass: SessionView.self), compatibleWithTraitCollection: nil)
     }
-    */
-    
     
 }

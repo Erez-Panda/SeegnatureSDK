@@ -13,10 +13,13 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
     
     var currentCall: NSDictionary?
     var capabilities: NSDictionary?
+    var isRep = false
+    var resources: Array<Dictionary<String, AnyObject>>?
+    
     var disconnectingCall: Bool?
     
     static let sharedInstance = Session()
-
+    let SubscribeToSelf = false
     var sessionView = SessionView()
     
     override init() {
@@ -37,7 +40,7 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
 //            CallUtils.getCallerImage()
 
         })
-
+        
     }
     
     func handleSessioInfoResponse(completion: () -> Void) -> Void{
@@ -49,15 +52,12 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
                 
                 CallUtils.delegate = self // set delegate
                 CallUtils.initCall(callSession, token: callToken)
-                
                 CallUtils.whenConnected({ (result) -> Void in
                     if videoEnabled() {
                         CallUtils.doPublish()
                     }
                 })
-                
                 completion()
-                
             } else {
                 completion()
             }
@@ -68,22 +68,21 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
     
     func loadView(superView: UIView) {
         let documentView = NSBundle(forClass: SeegnatureActions.self).loadNibNamed("SessionView", owner: self, options: nil)[0] as! SessionView
-        
+        documentView.resources = self.resources
+        documentView.currentSession = self
         documentView.attachToView(superView)
-        //            documentView.user = user
-        
+        documentView.initDocument()
         self.sessionView = documentView
-
+        //            documentView.user = user
     }
     
     // MARK: - OTSession delegate callbacks
     
     func sessionDidConnect(session: OTSession) {
         NSLog("sessionDidConnect (\(session.sessionId))")
-        
         // Step 2: We have successfully connected, now instantiate a publisher and
         // begin pushing A/V streams into OpenTok.
-//        CallUtils.doPublish()
+        // CallUtils.doPublish()
         if CallUtils.session?.sessionConnectionStatus == OTSessionConnectionStatus.Connected {
             CallUtils.didConnectToSession()
         }
@@ -107,6 +106,7 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
         if (stream.videoType == OTStreamVideoType.Screen){
             CallUtils.doScreenUnsubscribe()
         } else {
+            self.sessionView.parentViewController?.navigationController?.navigationBarHidden = false
             if CallUtils.subscriber?.stream.streamId == stream.streamId {
                 //self.activeChatView.text = (self.activeChatView.text + "Remote side stopped video stream\n")
                 CallUtils.doUnsubscribe()
@@ -162,9 +162,8 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
     // MARK: - OTSubscriber delegate callbacks
     
     func subscriberDidConnectToStream(subscriberKit: OTSubscriberKit) {
-        NSLog("subscriberDidConnectToStream (\(subscriberKit))")        
+        NSLog("subscriberDidConnectToStream (\(subscriberKit))")
         self.sessionView.subscriberDidConnectToStream()
-        
     }
     
     func subscriber(subscriber: OTSubscriberKit, didFailWithError error : OTError) {
@@ -175,15 +174,15 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
     
     func publisher(publisher: OTPublisherKit, streamCreated stream: OTStream) {
         NSLog("publisher streamCreated %@", stream)
-        /*
+        
         // Step 3b: (if YES == subscribeToSelf): Our own publisher is now visible to
         // all participants in the OpenTok session. We will attempt to subscribe to
         // our own stream. Expect to see a slight delay in the subscriber video and
         // an echo of the audio coming from the device microphone.
         if CallUtils.subscriber == nil && SubscribeToSelf {
-        CallUtils.doSubscribe(stream)
+            CallUtils.doSubscribe(stream)
         }
-        */
+
     }
     
     func publisher(publisher: OTPublisherKit, streamDestroyed stream: OTStream) {
@@ -203,7 +202,6 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
         if ((connection?.connectionId != CallUtils.session?.connection?.connectionId) ||
             (connection == nil) || (session == nil)) {
 //        if (connection?.connectionId != CallUtils.session?.connection?.connectionId) {
-            printLog(string)
             self.sessionView.handleSignal(session, receivedSignalType: type, fromConnection: connection, withString: string)
 
         }

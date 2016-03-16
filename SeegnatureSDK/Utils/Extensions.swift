@@ -16,26 +16,6 @@ func printLog(logMessage: AnyObject, functionName: String = __FUNCTION__) {
     print("----------------------------------")
 }
 
-enum SignalsType : String{
-    case Send_Meta_Data = "send_meta_data"
-    case Load_Res_With_Index = "load_res_with_index"
-    case Preload_Res_With_Index = "preload_res_with_index"
-    case Chat_Text = "chat_text"
-    case Line_Start_Point = "line_start_point"
-    case Line_Point = "line_point"
-    case Line_Clear = "line_clear"
-    case Pointer_Position = "pointer_position"
-    case Pointer_Hide = "pointer_hide"
-    case Zoom_Scale = "zoom_scale"
-    case Signature_Points = "signature_points"
-    case Add_Text = "add_text"
-    case Ask_For_Photo = "ask_for_photo"
-    case Translate_And_Scale = "translate_and_scale"
-    case Open_Rep_Box = "mouse_pos"
-    case Text_Font_Change = "text_font_change"
-}
-
-
 extension UIView {
     
     func addBorder(borderColor: UIColor, borderWidth: CGFloat = 1) {
@@ -115,6 +95,12 @@ extension String {
     var floatValue: Float {
         return (self as NSString).floatValue
     }
+    
+    func serverDateToNSDate() -> NSDate {
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        return dateFormatter.dateFromString(self)!
+    }
 }
 
 extension NSMutableData {
@@ -128,6 +114,30 @@ extension NSMutableData {
     func appendString(string: String) {
         let data = string.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)
         appendData(data!)
+    }
+}
+
+extension Array {
+    subscript (safe index: Int) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+}
+
+extension UIButton {
+    func setImageForAllStates(image: UIImage) {
+        self.setImage(image, forState: .Application)
+        self.setImage(image, forState: .Disabled)
+        self.setImage(image, forState: .Focused)
+        self.setImage(image, forState: .Highlighted)
+        self.setImage(image, forState: .Normal)
+        self.setImage(image, forState: .Reserved)
+        self.setImage(image, forState: .Selected)
+    }
+}
+
+extension UITextField {
+    func setFontSize(size: CGFloat) {
+        self.font = UIFont(name: self.font!.fontName, size: size)
     }
 }
 
@@ -165,3 +175,19 @@ public func getTopViewController() -> UIViewController? {
         return nil
     }
 }
+
+public func randomStringWithLength(length: Int) -> String {
+    
+    let letters : NSString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    
+    let randomString : NSMutableString = NSMutableString(capacity: length)
+    
+    for (var i=0; i < length; i++){
+        let length = UInt32 (letters.length)
+        let rand = arc4random_uniform(length)
+        randomString.appendFormat("%C", letters.characterAtIndex(Int(rand)))
+    }
+    
+    return randomString as String
+}
+

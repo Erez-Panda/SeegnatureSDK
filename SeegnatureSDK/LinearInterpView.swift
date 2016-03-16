@@ -71,9 +71,11 @@ class LinearInterpView: UIView {
     }
     
     func cleanView(){
-        self.path?.removeAllPoints()
-        points = []
-        self.setNeedsDisplay()
+        if (self.path != nil) {
+            self.path?.removeAllPoints()
+            points = []
+            self.setNeedsDisplay()
+        }
     }
     
     

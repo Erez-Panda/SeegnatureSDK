@@ -8,8 +8,8 @@
 
 import Foundation
 
-//var SERVER_URL = "https://www.seegnature.com"
-var SERVER_URL = "http://www.livemed-test.com"
+var SERVER_URL = "https://www.seegnature.com"
+//var SERVER_URL = "http://www.livemed-test.com"
 
 // MARK:
 
@@ -65,10 +65,16 @@ class ServerAPI {
         }
     }
     
+    func sendDeviceToken(token: String, completion: (result: Bool) -> Void) -> Void{
+        let data = ["registration_id": token] as Dictionary<String, String>
+        self.http("/users/device-token/", message: data, method: .POST, completion: {result -> Void in
+        })
+    }
+    
     func login(email: String, password: String, completion: (result: Bool) -> Void) -> Void{
-        let message = ["username":email,
-            "password":password
-        ]
+
+        let message = ["username":email, "password":password]
+        
         self.http("/api-token-auth/", message: message, method: .POST, completion: {result -> Void in
             if let res = result as? NSDictionary{
                 if (nil != res["token"]){
@@ -81,6 +87,12 @@ class ServerAPI {
                 completion(result: false)
             }
         })
+    }
+    
+    func logout(completion: (result: Bool) -> Void) -> Void{
+//        func loginout(completion: (result: Bool) -> Void) -> Void{
+            completion(result: true) //fix after adding response to server
+//        }
     }
     
     

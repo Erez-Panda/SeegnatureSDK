@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ChatView: UIView {
+class ChatView: UIView, UITextFieldDelegate {
 
     var lastChatBox: UIView?
     var bottomConstraint: NSLayoutConstraint?

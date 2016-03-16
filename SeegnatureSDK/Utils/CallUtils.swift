@@ -191,6 +191,9 @@ struct CallUtils{
      * to the OpenTok session.
      */
     static func doPublish() { // publish my screen
+        if publisher != nil {
+            return
+        }
         publisher = OTPublisher(delegate: self.publisherDelegate)
         publisher?.publishVideo = false
         var maybeError : OTError?
