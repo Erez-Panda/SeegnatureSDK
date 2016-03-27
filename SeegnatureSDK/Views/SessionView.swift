@@ -480,6 +480,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
                     printLog(result)                    
                     if nil != result["id"] as? Int{
                         self.resources?.append(result as! Dictionary<String, AnyObject>)
+                        
                         self.down(UISwipeGestureRecognizer())
                     }
                 })
@@ -1218,7 +1219,10 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     // MARK: outgoing messages
     
     func sendCloseBoxRequest(isTextBox: Bool) {
-        let dictionary = ["text_box": isTextBox, "sign_box": !isTextBox]
+        var dictionary = ["type": "sign_box"]
+        if isTextBox {
+            dictionary["type"] = "text_box"
+        }
         CallUtils.sendJsonMessage(SignalsType.Close_Rep_Box.rawValue, data: dictionary)
     }
     

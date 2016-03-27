@@ -241,7 +241,7 @@ struct CallUtils{
             var maybeError : OTError?
             session?.unsubscribe(screenSubscriber, error: &maybeError)
             if let error = maybeError {
-                ViewUtils.showAlert("OTError", message: error.localizedDescription)
+//                ViewUtils.showAlert("OTError", message: error.localizedDescription)
             }
             
             screenSubscriber.view.removeFromSuperview()

@@ -39,10 +39,16 @@ class ServerAPI {
     }
     
     func getDictionaryResult(result: AnyObject) ->NSDictionary {
+        print(result)
         if let res = result as? NSDictionary {
             return res
         } else {
-            return [:]
+            if let res = result as? NSData {
+                let newDictionary = CallUtils.convertStringToDictionary(String(NSString(data: res, encoding: NSUTF8StringEncoding)!))!
+                return newDictionary
+            } else {
+                return [:]
+            }
         }
     }
     
