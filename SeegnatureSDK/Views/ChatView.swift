@@ -26,6 +26,7 @@ class ChatView: UIView, UITextFieldDelegate {
         }
         
         chatText.attributedPlaceholder = ViewUtils.getAttrText("Type a message here...", color: UIColor.lightGrayColor(), size: 16.0)
+        self.chatText.delegate = self
     }
 
     // MARK: keyboard methods
@@ -100,9 +101,11 @@ class ChatView: UIView, UITextFieldDelegate {
     }
 
     @IBAction func closeButtonPressed(sender: AnyObject) {
-        UIView.animateWithDuration(0.5, animations: { () -> Void in
+        UIView.animateWithDuration(0.4, animations: { () -> Void in
             self.frame.origin.y = self.frame.height
-            self.removeFromSuperview()
+            }, completion: {
+                Void in
+                self.removeFromSuperview()
         })
     }
 

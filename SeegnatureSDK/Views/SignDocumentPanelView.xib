@@ -109,6 +109,8 @@
                 </mask>
             </variation>
             <connections>
+                <outlet property="SignButton" destination="D3I-ih-Es2" id="hLN-t5-RSx"/>
+                <outlet property="moveButton" destination="hkD-re-f6Q" id="jbF-3n-Sot"/>
                 <outlet property="signView" destination="Npg-cH-FmI" id="GGV-Kk-GlY"/>
             </connections>
             <point key="canvasLocation" x="293.5" y="261"/>

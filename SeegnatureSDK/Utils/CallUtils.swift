@@ -89,7 +89,6 @@ struct CallUtils{
     
     static func whenConnected(completion: (result: Bool) -> Void){
         if isConnectedToSession {
-            printLog("true")
             completion(result: true)
         } else {
             printLog("false")
@@ -224,6 +223,7 @@ struct CallUtils{
         
     }
     
+    // Subscribe to other user screen streaming
     static func doScreenSubscribe(stream : OTStream) {
         if let session = self.session {
             screenSubscriber = OTSubscriber(stream: stream, delegate: self.subscriberDelegate)
@@ -234,6 +234,8 @@ struct CallUtils{
             }
         }
     }
+    
+    // Unsubscribe to other user screen streaming    
     static func doScreenUnsubscribe() {
         if let screenSubscriber = self.screenSubscriber {
             var maybeError : OTError?
@@ -313,7 +315,7 @@ struct CallUtils{
             self.session?.signalWithType(type, string: NSString(data: jsonData, encoding: NSUTF8StringEncoding)! as String, connection: nil, error: &maybeError)
         }
         catch{
-            
+            printLog("error")
         }
     }
     

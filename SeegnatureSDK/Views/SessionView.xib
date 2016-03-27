@@ -86,8 +86,8 @@
                         <action selector="toggleToolsPanel:" destination="ve8-An-joz" eventType="touchUpInside" id="EVM-2A-NQs"/>
                     </connections>
                 </button>
-                <view alpha="0.85000002384185791" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eTW-U9-gai" userLabel="tools panel">
-                    <rect key="frame" x="-60" y="40" width="60" height="440"/>
+                <view alpha="0.85000002384185791" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eTW-U9-gai" userLabel="tools panel">
+                    <rect key="frame" x="0.0" y="40" width="60" height="440"/>
                     <subviews>
                         <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Gwq-Vc-QTN">
                             <rect key="frame" x="0.0" y="0.0" width="60" height="392"/>
@@ -110,6 +110,9 @@
                                             <real key="value" value="20"/>
                                         </userDefinedRuntimeAttribute>
                                     </userDefinedRuntimeAttributes>
+                                    <connections>
+                                        <action selector="openDropbox:" destination="ve8-An-joz" eventType="touchUpInside" id="ReO-js-I1h"/>
+                                    </connections>
                                 </button>
                                 <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ihK-hR-Xz5" userLabel="pointer" customClass="NIKFontAwesomeButton">
                                     <rect key="frame" x="10" y="48" width="40" height="40"/>
@@ -156,32 +159,12 @@
                                             <exclude reference="48e-BF-7g0"/>
                                         </mask>
                                     </variation>
+                                    <connections>
+                                        <action selector="openWebPage:" destination="ve8-An-joz" eventType="touchUpInside" id="rmC-jo-o3w"/>
+                                    </connections>
                                 </button>
-                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bWx-kw-AfK" userLabel="pencil" customClass="NIKFontAwesomeButton">
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Nqq-cC-XTp" userLabel="trash" customClass="NIKFontAwesomeButton">
                                     <rect key="frame" x="10" y="124" width="40" height="40"/>
-                                    <constraints>
-                                        <constraint firstAttribute="height" constant="50" id="VO9-sZ-OKC"/>
-                                    </constraints>
-                                    <state key="normal">
-                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                    </state>
-                                    <userDefinedRuntimeAttributes>
-                                        <userDefinedRuntimeAttribute type="string" keyPath="iconHex" value="f040"/>
-                                        <userDefinedRuntimeAttribute type="color" keyPath="color">
-                                            <color key="value" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                        </userDefinedRuntimeAttribute>
-                                        <userDefinedRuntimeAttribute type="number" keyPath="size">
-                                            <real key="value" value="20"/>
-                                        </userDefinedRuntimeAttribute>
-                                    </userDefinedRuntimeAttributes>
-                                    <variation key="default">
-                                        <mask key="constraints">
-                                            <exclude reference="VO9-sZ-OKC"/>
-                                        </mask>
-                                    </variation>
-                                </button>
-                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Nqq-cC-XTp" userLabel="eraser" customClass="NIKFontAwesomeButton">
-                                    <rect key="frame" x="10" y="172" width="40" height="40"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="50" id="xck-cn-r1r"/>
                                     </constraints>
@@ -189,7 +172,7 @@
                                         <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                     </state>
                                     <userDefinedRuntimeAttributes>
-                                        <userDefinedRuntimeAttribute type="string" keyPath="iconHex" value="f12d"/>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="iconHex" value="f014"/>
                                         <userDefinedRuntimeAttribute type="color" keyPath="color">
                                             <color key="value" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         </userDefinedRuntimeAttribute>
@@ -202,6 +185,9 @@
                                             <exclude reference="xck-cn-r1r"/>
                                         </mask>
                                     </variation>
+                                    <connections>
+                                        <action selector="deleteChanges:" destination="ve8-An-joz" eventType="touchUpInside" id="cIM-LF-AAL"/>
+                                    </connections>
                                 </button>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PsU-d7-TMQ" userLabel="lock" customClass="NIKFontAwesomeButton">
                                     <rect key="frame" x="10" y="96" width="40" height="20"/>
@@ -225,18 +211,17 @@
                                             <exclude reference="bFH-JO-b5Q"/>
                                         </mask>
                                     </variation>
+                                    <connections>
+                                        <action selector="lockDocument:" destination="ve8-An-joz" eventType="touchUpInside" id="3m9-kI-NCD"/>
+                                    </connections>
                                 </button>
                             </subviews>
                             <constraints>
-                                <constraint firstItem="bWx-kw-AfK" firstAttribute="top" secondItem="PsU-d7-TMQ" secondAttribute="bottom" constant="8" id="0DI-y5-kGT"/>
                                 <constraint firstAttribute="bottom" secondItem="Nqq-cC-XTp" secondAttribute="bottom" constant="8" id="0ak-nS-4E7"/>
-                                <constraint firstItem="bWx-kw-AfK" firstAttribute="height" secondItem="8hh-0l-8yu" secondAttribute="height" id="2bQ-Gt-QLB"/>
                                 <constraint firstItem="PsU-d7-TMQ" firstAttribute="leading" secondItem="8hh-0l-8yu" secondAttribute="leading" id="7tB-zK-lf0"/>
-                                <constraint firstItem="bWx-kw-AfK" firstAttribute="top" secondItem="8hh-0l-8yu" secondAttribute="bottom" constant="8" id="8u5-hi-hEa"/>
-                                <constraint firstItem="bWx-kw-AfK" firstAttribute="top" secondItem="iXG-tT-xtG" secondAttribute="bottom" constant="8" id="AYQ-y3-zNo"/>
                                 <constraint firstItem="PsU-d7-TMQ" firstAttribute="trailing" secondItem="8hh-0l-8yu" secondAttribute="trailing" id="Cv6-MA-oNv"/>
+                                <constraint firstItem="Nqq-cC-XTp" firstAttribute="top" secondItem="PsU-d7-TMQ" secondAttribute="bottom" constant="8" id="IcY-2G-dJs"/>
                                 <constraint firstItem="ihK-hR-Xz5" firstAttribute="top" secondItem="Nqq-cC-XTp" secondAttribute="bottom" constant="8" id="JkK-Hw-MA8"/>
-                                <constraint firstItem="bWx-kw-AfK" firstAttribute="trailing" secondItem="8hh-0l-8yu" secondAttribute="trailing" id="Llg-N8-Chb"/>
                                 <constraint firstItem="iXG-tT-xtG" firstAttribute="top" secondItem="8hh-0l-8yu" secondAttribute="bottom" constant="8" id="M9n-Hn-OZf"/>
                                 <constraint firstAttribute="trailing" secondItem="8hh-0l-8yu" secondAttribute="trailing" constant="10" id="PUy-9g-jcu"/>
                                 <constraint firstItem="8hh-0l-8yu" firstAttribute="top" secondItem="Gwq-Vc-QTN" secondAttribute="top" id="Qt3-Oo-IPw"/>
@@ -251,10 +236,8 @@
                                 <constraint firstItem="8hh-0l-8yu" firstAttribute="leading" secondItem="iXG-tT-xtG" secondAttribute="leading" id="ikh-es-h7v"/>
                                 <constraint firstItem="8hh-0l-8yu" firstAttribute="trailing" secondItem="iXG-tT-xtG" secondAttribute="trailing" id="m2y-eg-pIq"/>
                                 <constraint firstItem="ihK-hR-Xz5" firstAttribute="height" secondItem="8hh-0l-8yu" secondAttribute="height" id="nbX-cT-c4d"/>
-                                <constraint firstItem="bWx-kw-AfK" firstAttribute="leading" secondItem="8hh-0l-8yu" secondAttribute="leading" id="oA4-Bt-87c"/>
                                 <constraint firstItem="8hh-0l-8yu" firstAttribute="leading" secondItem="Gwq-Vc-QTN" secondAttribute="leading" constant="10" id="uiz-EK-G5Y"/>
                                 <constraint firstItem="8hh-0l-8yu" firstAttribute="height" secondItem="iXG-tT-xtG" secondAttribute="height" id="xTq-1p-iXO"/>
-                                <constraint firstItem="Nqq-cC-XTp" firstAttribute="top" secondItem="bWx-kw-AfK" secondAttribute="bottom" constant="8" id="xyd-Kr-eBC"/>
                                 <constraint firstItem="ihK-hR-Xz5" firstAttribute="leading" secondItem="8hh-0l-8yu" secondAttribute="leading" id="ydV-FI-P5f"/>
                             </constraints>
                             <variation key="default">
@@ -262,8 +245,6 @@
                                     <exclude reference="JkK-Hw-MA8"/>
                                     <exclude reference="SUu-Av-0MY"/>
                                     <exclude reference="Voa-Zw-hAl"/>
-                                    <exclude reference="8u5-hi-hEa"/>
-                                    <exclude reference="AYQ-y3-zNo"/>
                                 </mask>
                             </variation>
                             <connections>
@@ -287,6 +268,9 @@
                                     <real key="value" value="22"/>
                                 </userDefinedRuntimeAttribute>
                             </userDefinedRuntimeAttributes>
+                            <connections>
+                                <action selector="stopSharing:" destination="ve8-An-joz" eventType="touchUpInside" id="CaX-Be-pyv"/>
+                            </connections>
                         </button>
                     </subviews>
                     <color key="backgroundColor" white="0.66666666669999997" alpha="0.5" colorSpace="calibratedWhite"/>

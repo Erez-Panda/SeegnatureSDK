@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SignDocumentPanelView: UIView {
+class SignDocumentPanelView: UIView, InputPanelsDelegate {
     
     var onSign: ((signatureView: LinearInterpView, origin: CGPoint) -> ())?
     var onClose: ((sender: UIView) -> ())?
@@ -20,6 +20,11 @@ class SignDocumentPanelView: UIView {
     var height: NSLayoutConstraint?
     var last_open_box_info: String?
     
+    var isOpenedOnRemoteSide = false
+    
+    @IBOutlet weak var SignButton: UIButton!
+    @IBOutlet weak var moveButton: NIKFontAwesomeButton!
+    
     override func awakeFromNib() {
         self.layer.cornerRadius = 8
         self.layer.borderColor = ColorUtils.buttonColor().CGColor
@@ -27,6 +32,21 @@ class SignDocumentPanelView: UIView {
         self.clipsToBounds = true
         self.signView.blockTouches = true
         self.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    func openedOnRemoteSide(touchLocation: CGPoint) {
+
+        dispatch_async(dispatch_get_main_queue()){
+            self.moveButton.backgroundColor = UIColor.grayColor()
+            self.moveButton.color = UIColor.whiteColor()
+            self.SignButton.backgroundColor = UIColor.grayColor()
+            self.userInteractionEnabled = false
+        }
+        
+        let bounds = UIScreen.mainScreen().bounds
+        self.center_x_constraint?.constant = touchLocation.x - bounds.width/2
+        self.center_y_constraint?.constant = touchLocation.y - bounds.height/2
+        self.isOpenedOnRemoteSide = true
     }
     
     override var hidden: Bool {
@@ -38,6 +58,15 @@ class SignDocumentPanelView: UIView {
             self.last_open_box_info = nil
             if self.signView != nil {
                 self.signView.cleanView()
+                self.SignButton.backgroundColor = ColorUtils.uicolorFromHex(0x67CA94)
+                self.moveButton.color = UIColor.whiteColor()
+                self.moveButton.backgroundColor = ColorUtils.uicolorFromHex(0x67CA94)
+                if self.isOpenedOnRemoteSide {
+                    self.userInteractionEnabled = false
+                } else {
+                    self.userInteractionEnabled = true
+                }
+                (self.superview as! SessionView).scrollView.scrollEnabled = v
             }
         }
     }

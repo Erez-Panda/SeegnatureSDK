@@ -23,9 +23,7 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
     var sessionView = SessionView()
     
     override init() {
-
         printLog("Initializing session class")
-
     }
 
     func getSessionInfo(id:String, completion: (result: NSDictionary) -> Void) -> Void{
@@ -92,17 +90,16 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
     func sessionDidDisconnect(session : OTSession) {
         NSLog("Session disconnected (\( session.sessionId))")
     }
-    
+
     func session(session: OTSession, streamCreated stream: OTStream) {
         NSLog("session streamCreated (\(stream.streamId))")
         // Step 3a: (if NO == subscribeToSelf): Begin subscribing to a stream we
         // have seen on the OpenTok session.
         subscribeToStream(stream)
-        
     }
     
     func session(session: OTSession, streamDestroyed stream: OTStream) {
-        NSLog("session streamCreated (\(stream.streamId))")
+        NSLog("session streamDestroyed (\(stream.streamId))")
         if (stream.videoType == OTStreamVideoType.Screen){
             CallUtils.doScreenUnsubscribe()
         } else {
@@ -117,8 +114,7 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
     func session(session: OTSession, connectionCreated connection : OTConnection) {
         NSLog("session connectionCreated (\(connection.connectionId))")
         if connection.connectionId != CallUtils.session?.connection.connectionId {
-            //self.activeChatView.text = (self.activeChatView.text + "Remote side connected to session\n")
-            CallUtils.remoteSideConnected()
+            self.sessionView.remoteSideConnected()
             for (_, stream) in session.streams{
                 if let s = stream as? OTStream{
                     subscribeToStream(s)
@@ -127,25 +123,15 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
         }
     }
     
+    // Called when other side opens screen/video share
     func subscribeToStream(stream: OTStream){
-//        self.sessionView.videoButtonPressed(UIButton())
-//        CallUtils.doSubscribe(stream)
-        CallUtils.stream = stream
-        // show my video
-        
         if (stream.videoType == OTStreamVideoType.Screen){
             CallUtils.doScreenSubscribe(stream)
-            
+        // if it's not screen case it's camera
         } else if CallUtils.subscriber?.stream.streamId != stream.streamId {
             CallUtils.stream = stream
-//            if (showIncoming){
-//                CallUtils.upcomingViewController?.close(false)
-//                ViewUtils.showIncomingCall()
-//            } else {
-                CallUtils.doSubscribe(stream)
-//            }
-//            requestForCurrentSlide()
-        } else if (CallUtils.isFakeCall){
+            CallUtils.doSubscribe(stream)
+        } else {
             CallUtils.stream = stream
         }
     }

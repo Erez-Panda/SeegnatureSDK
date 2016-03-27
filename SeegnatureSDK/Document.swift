@@ -77,6 +77,10 @@ class Page: NSObject {
         if let val = dictionary["document"] as? Int {
             self.document = val
         }
+        
+        if let val = dictionary["image"] as? UIImage {
+            self.image = val
+        }
     }
     
     convenience override init() {

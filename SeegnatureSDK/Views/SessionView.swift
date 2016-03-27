@@ -14,8 +14,8 @@ let videoHeight : CGFloat = 198/1.5
 
 let textPanelWidth: CGFloat = 300
 let textPanelHeight: CGFloat = 120
-let signPanelWidth: CGFloat = 300 //UIScreen.mainScreen().bounds.width/2
-var signPanelHeight: CGFloat = 120
+let signPanelWidth: CGFloat = UIScreen.mainScreen().bounds.width * 0.8
+var signPanelHeight: CGFloat = 140
 
 class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, FileSelectorDelegate {
 
@@ -48,8 +48,8 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     var preLoadedImages = Array<Document>()
     var currentImage: UIImage?
     var currentImageUrl: String?
-    var currentDocument: Int?
-    var currentPage: Int?
+    var currentDocument = 0
+    var currentPage = 0
     var modifiedImages: Dictionary<String, UIImage?> = [:]
     
     var isDragging = false
@@ -69,6 +69,8 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     
     var isFirstLoad = true
     
+    var sentRemoteSideData = false
+    
     // chat
     var messageQ : NSArray = []
     var isChatShown = false
@@ -86,8 +88,9 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     var drawingMode = false
     var toolsPanelHidden = true
  
+    private var kvoContext = 0
     
-    // MARK: init methods
+    // MARK: - init methods
     
     override func awakeFromNib() {
         
@@ -103,26 +106,11 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         
     }
     
-    func addScreenRotationNotification() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "screenRotated", name: UIDeviceOrientationDidChangeNotification, object: nil)
-    }
-    
-    func screenRotated() {
-        NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(0.1), target: self, selector: Selector("moshe"), userInfo: AnyObject?(), repeats: false)
-    }
-    
-    func moshe() {
-        if let data = self.signView?.last_open_box_info {
-            handleOpenBox(data)
-        }
-        
-        if let data = self.addTextView?.last_open_box_info {
-            handleOpenBox(data)
-        }
-    }
+//    override func willMoveToSuperview(newSuperview: UIView?) {
+//        self.parentViewController?.navigationController?.navigationBarHidden = true
+//    }
 
     func initClientSession() {
-//        self.toggleControllPanelButton.hidden = true
         self.toggleToolsButton.hidden = true
         addClientGestures()
     }
@@ -143,10 +131,6 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         
         isFirstLoad = false
     }
-    
-    
-    
-    // MARK: rep methods
     
     func initRepSession() {
         if isFirstLoad {
@@ -178,6 +162,27 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         }
     }
     
+    // MARK: - screen rotation
+    func addScreenRotationNotification() {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "screenRotated", name: UIDeviceOrientationDidChangeNotification, object: nil)
+    }
+    
+    func screenRotated() {
+        NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(0.1), target: self, selector: Selector("rotateScreen"), userInfo: AnyObject?(), repeats: false)
+    }
+    
+    func rotateScreen() {
+        if let data = self.signView?.last_open_box_info {
+            handleOpenBox(data)
+        }
+        
+        if let data = self.addTextView?.last_open_box_info {
+            handleOpenBox(data)
+        }
+    }
+    
+    // MARK: - rep methods
+    
     // Rep -> called when changing resource
     func changeDisplayResource(index: Int) {
         if preLoadedImages[safe: index] == nil{
@@ -198,7 +203,11 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
                                         self.loadImage(dispRes["id"] as! NSNumber)
                                     }
                                     if self.currentSession!.isRep == true {
-                                        self.preLoadDisplayResources()
+                                        self.preLoadDisplayResources({
+                                            if self.sentRemoteSideData == false {
+                                                self.remoteSideConnected()
+                                            }
+                                        })
                                     }
                                 })
                             }
@@ -210,7 +219,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             self.next(UISwipeGestureRecognizer())
         }
     }
-    
+
     func loadImage(imageFile: NSNumber){
         ServerAPI.sharedInstance.getFileUrl(imageFile, completion: { (result) -> Void in
             self.currentImageUrl = result as String
@@ -234,31 +243,85 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             let data = ["page": scopeIndex,
                 "document": self.getSelectedResourceId(scopeSelectedResIndex),
                 "url": result as String] as Dictionary<String, AnyObject>
+            let documentId = self.getSelectedResourceId(scopeSelectedResIndex) as Int
             CallUtils.sendJsonMessage("preload_res_with_index", data: data)
             if url != nil {
                 self.fileSelector.getDataFromUrl(url!) { data in
-                    if let document = self.preLoadedImages[safe: scopeSelectedResIndex] {
-                        if let page = self.getPageByIndex(document, index: scopeIndex) {
-                            page.image = UIImage(data: data!)
-                            page.url = result as String
-                            dispatch_async(dispatch_get_main_queue()){
-                                if self.showNextSlide {
-                                    self.activity.stopAnimating()
-                                    self.showNextSlide = false
-                                    self.next(UISwipeGestureRecognizer())
-                                }
-                                
-                            }
+                    self.addPageToDocument(documentId, pageIndex: index, image: UIImage(data: data!)!, url: result as String, pageId: imageFile as Int)
+                    dispatch_async(dispatch_get_main_queue()){
+                        if self.showNextSlide {
+                            self.activity.stopAnimating()
+                            self.showNextSlide = false
+                            self.next(UISwipeGestureRecognizer())
                         }
-                        
                     }
                 }
             }
         })
     }
     
+    // MARK: - on remote side connected
+    func remoteSideConnected() {
+        if self.currentSession?.isRep == true {
+            handleRemoteSideConnectedAsClient()
+        } else {
+            handleRemoteSideConnectedAsRep()
+        }
+    }
+    
+    func handleRemoteSideConnectedAsClient() {
+
+        if preLoadedImages.isEmpty {
+            return
+        }
+        
+        sendMetaDataRequest([:])
+        sendLoadResWithIndexRequest(currentPage)
+        sendPreloadResRequest()
+        sentRemoteSideData = true
+    }
+    
+
+    
+    func handleRemoteSideConnectedAsRep() {
+    
+    }
+    
+    // MARK: - uiscrollview delegate
+    
+    func scrollViewDidEndZooming(scrollView: UIScrollView, withView view: UIView?, atScale scale: CGFloat) {
+        sendTranslateAndScale()
+    }
+
+    func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        sendTranslateAndScale()
+    }
+    
+    func scrollViewDidScroll(scrollView: UIScrollView) {
+        if ((self.signView?.hidden == false) || (self.addTextView?.hidden == false)) {
+            scrollView.scrollEnabled = false
+        } else {
+            if scrollView.zoomScale != 1.0 {
+                scrollView.scrollEnabled = true
+            } else {
+                scrollView.scrollEnabled = false
+            }
+        }
+
+    }
+    
+    // MARK: - tap gestures handlers
+    
+    // swipe right: move to next page
     func next(sender: UISwipeGestureRecognizer) {
-        if self.isDragging || self.drawingMode || signView != nil || addTextView != nil{return}
+
+        if scrollView.zoomScale != 1 {
+            return
+        }
+        
+        if self.isDragging || self.drawingMode || !signView!.hidden || !addTextView!.hidden {
+            return
+        }
         if (currentImageIndex+1 == preLoadedImages[selectedResIndex].pages.count){
             return
         }
@@ -279,8 +342,17 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         }
     }
     
+    // swipe left: move to previous page
     func prev(sender: UISwipeGestureRecognizer) {
-        if self.isDragging || self.drawingMode || signView != nil || addTextView != nil{return}
+        
+        if scrollView.zoomScale != 1 {
+            return
+        }
+        
+        if self.isDragging || self.drawingMode || !signView!.hidden || !addTextView!.hidden {
+            return
+        }
+        
         if currentImageIndex <= 0{
             return
         }
@@ -290,7 +362,6 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
                 if let image = page.image {
                     currentImageIndex--
                     self.presentaionImage.image = image
-//                    if let urlStr = preLoadedImagesUrl?[selectedResIndex]?[currentImageIndex]{
                     if let urlStr = page.url{
                         let data = ["page": self.currentImageIndex,
                             "document": self.getSelectedResourceId(),
@@ -302,9 +373,17 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         }
     }
     
+    // swipe up: move to previous document
     func up(sender: UISwipeGestureRecognizer) {
+        
+        if scrollView.zoomScale != 1 {
+            return
+        }
+        
         let old = selectedResIndex
-        if self.isDragging || self.drawingMode || signView != nil || addTextView != nil{return}
+        if self.isDragging || self.drawingMode || !signView!.hidden || !addTextView!.hidden {
+            return
+        }
         if (selectedResIndex+1 >= self.resources?.count){
             selectedResIndex = -1
         }
@@ -314,9 +393,18 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             changeDisplayResource(selectedResIndex)
         }
     }
+    
+    // swipe down: move to next document
     func down(sender: UISwipeGestureRecognizer) {
+        
+        if scrollView.zoomScale != 1 {
+            return
+        }
+        
         let old = selectedResIndex
-        if self.isDragging || self.drawingMode || signView != nil || addTextView != nil{return}
+        if self.isDragging || self.drawingMode || !signView!.hidden || !addTextView!.hidden {
+            return
+        }
         if selectedResIndex <= 0{
             selectedResIndex = self.resources!.count
         }
@@ -327,11 +415,18 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         }
     }
     
-    // When rep this method should open text box in client's screen
+    // long tap: open sign panel on client's side.
     func longTap(sender: UILongPressGestureRecognizer){
-//        isPointing = true
-//        pointer.hidden = false
+        if sender.state == .Began {
+            openInputPanelOnRemote(sender, panelType: PanelType.sign_panel)
+        }
     }
+    
+    // double tap: open text panel on client's side
+    func doubleTap(sender: UITapGestureRecognizer) {
+        openInputPanelOnRemote(sender, panelType: PanelType.text_panel)
+    }
+
     
     @IBAction func togglePanelButtonTapped(sender: AnyObject) {
         if (controlPanelHidden == true) {
@@ -341,31 +436,6 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         }
     }
     
-    @IBAction func toggleToolsPanel(sender: AnyObject) {
-        if (toolsPanelHidden == true) {
-            showToolsPanel()
-        } else {
-            hideToolsPanel()
-        }
-    }
-
-    func showToolsPanel() {
-        self.toolsPanelHidden = false
-        UIView.animateWithDuration(0.5, animations: { () -> Void in
-            self.sideViewLeadingConst.constant = 0
-            self.layoutIfNeeded()
-        })
-    }
-    
-    func hideToolsPanel() {
-        if let controls = self.sideView {
-            UIView.animateWithDuration(0.5, animations: { () -> Void in
-                self.sideViewLeadingConst.constant = controls.frame.width
-                self.layoutIfNeeded()
-            })
-        }
-        toolsPanelHidden = true
-    }
     
     func getSelectedResourceId() ->NSNumber{
         if let id = self.resources?[selectedResIndex]["id"] as? NSNumber{
@@ -382,7 +452,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     }
     
     // only rep
-    func preLoadDisplayResources(){
+    func preLoadDisplayResources(completion: () -> Void) {
         if let resources = displayResources {
             if preLoadedImages[safe: selectedResIndex] == nil {
                 for index in 0..<resources.count {
@@ -397,7 +467,6 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
 
     
     func fileSelected(file: File) {
-        // TODO:
         ServerAPI.sharedInstance.uploadFile(file.data!, filename: file.name!, mimetype: file.mimetype) { (result) -> Void in
             if let fileId = result["id"] as? Int{
                 let fileUrl = result["url"] as! String
@@ -408,6 +477,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
                     "file": fileId
                 ]
                 ServerAPI.sharedInstance.newResource(res, completion: { (result) -> Void in
+                    printLog(result)                    
                     if nil != result["id"] as? Int{
                         self.resources?.append(result as! Dictionary<String, AnyObject>)
                         self.down(UISwipeGestureRecognizer())
@@ -527,9 +597,44 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             self.isFirstLoad = false
         }
     }
+
+    // MARK: - Rep tools panel methods
+    @IBAction func toggleToolsPanel(sender: AnyObject) {
+        if (toolsPanelHidden == true) {
+            showRepToolsPanel()
+        } else {
+            hideRepToolsPanel()
+        }
+    }
     
+    func showRepToolsPanel() {
+        self.toolsPanelHidden = false
+        UIView.animateWithDuration(0.5, animations: { () -> Void in
+            self.sideViewLeadingConst.constant = 0
+            self.layoutIfNeeded()
+        })
+    }
     
-    // MARK: rep methods
+    func hideRepToolsPanel() {
+        if let controls = self.sideView {
+            UIView.animateWithDuration(0.5, animations: { () -> Void in
+                self.sideViewLeadingConst.constant = controls.frame.width
+                self.layoutIfNeeded()
+            })
+        }
+        toolsPanelHidden = true
+    }
+    
+    @IBAction func deleteChanges(sender: AnyObject) {
+        let callId = CallUtils.currentCall!["id"] as! Int
+        let documentId = self.preLoadedImages[currentDocument].id!
+        let page = currentPage
+        let url = getCurrentPage(page).url!
+        let newDictionary: Dictionary<String, AnyObject>  = ["callId": callId, "document": documentId, "page": page, "url": url]
+        printLog(newDictionary)
+        CallUtils.sendJsonMessage(SignalsType.Clean_Page.rawValue, data: newDictionary)
+        hideRepToolsPanel()
+    }
     
     @IBAction func openDropbox(sender: NIKFontAwesomeButton) {
         fileSelector.selectFile(sender)
@@ -604,6 +709,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         self.presentationWebView?.loadHTMLString("", baseURL:nil)
     }
     
+    // MARK: - drawing tool methods (disabled)
     @IBAction func toggleDrawingMode(sender: NIKFontAwesomeButton) {
         if self.drawingMode {
             drawingMode = false
@@ -633,13 +739,13 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         CallUtils.session?.signalWithType("line_clear", string: "", connection: nil, error: &maybeError)
     }
     
-    // MARK: scrollview methods
+    // MARK: - scrollview methods
     
     func viewForZoomingInScrollView(scrollView: UIScrollView) -> UIView? {
         return presentaionImage
     }
 
-    // MARK: control panel
+    // MARK: - control panel
     
     func setControlPanel() {
         controlPanelTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(5), target: self, selector: Selector("hideControlPanel"), userInfo: AnyObject?(), repeats: false)
@@ -665,7 +771,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         controlPanelHidden = true
     }
     
-    // MARK: gestures methods
+    // MARK: - gestures methods
     
     func addClientGestures() {
         self.addGestureRecognizer(UITapGestureRecognizer(target: self, action:"tap:"))
@@ -676,33 +782,29 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         let longTapReco = UILongPressGestureRecognizer(target: self, action: "longTap:")
         longTapReco.cancelsTouchesInView = false
         self.addGestureRecognizer(longTapReco)
+        let doubleTap = UITapGestureRecognizer(target: self, action: "doubleTap:")
+        doubleTap.cancelsTouchesInView = false
+        doubleTap.numberOfTapsRequired = 2
+        self.addGestureRecognizer(doubleTap)
         self.addGestureRecognizer(UITapGestureRecognizer(target: self, action:"tap:"))
     }
 
     func tap(sender:  UITapGestureRecognizer) {
-        if signView?.hidden == false { // signView != nil {
+        if signView?.hidden == false {
             if (!CGRectContainsPoint(signView!.frame, sender.locationInView(self))){
                 self.signView?.hidden = true
+                if self.currentSession?.isRep == true {
+                    sendCloseBoxRequest(false)
+                }
             }
         } else if addTextView?.hidden == false {
             if (!CGRectContainsPoint(addTextView!.frame, sender.locationInView(self))){
                 self.addTextView?.hidden = true
+                if self.currentSession?.isRep == true {
+                    sendCloseBoxRequest(true)
+                }
             }
         }
-        
-//        if self.chat == nil {
-//            if (controlPanelHidden) {
-//                showControlPanel()
-//            } else {
-//                hideControlPanel()
-//            }
-//        } else {
-//            hideControlPanel()
-////            if controlPanelHidden {
-////                showControlPanel()
-////            }
-//        }
-
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -776,13 +878,16 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
                 self.signView?.center_y_constraint?.constant = touchLocation.y - (self.frame.height - signPanelHeight)/2
             }
             if addTextView?.hidden == false {
+                if self.addTextView?.isOpenedOnRemoteSide == true {
+                    return
+                }
                 self.addTextView?.center_x_constraint?.constant = touchLocation.x - (self.frame.width - textPanelWidth)/2
                 self.addTextView?.center_y_constraint?.constant = touchLocation.y - (self.frame.height - textPanelHeight)/2
             }
         }
     }
     
-    // MARK: image picker methods
+    // MARK: - image picker methods
     
     func setImagePicker() {
         imagePicker.delegate = self
@@ -814,7 +919,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         })
     }
 
-    // MARK: handle buttons events
+    // MARK: - handle buttons events
     
     @IBAction func signButtonPressed(sender: AnyObject) {
         self.signView!.hidden = !self.signView!.hidden
@@ -842,29 +947,11 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             self.chat?.frame = CGRectMake(0, self.frame.size.height, self.frame.size.width, self.frame.size.height)
             
             releaseMessageQ()
-            UIView.animateWithDuration(0.5, animations: { () -> Void in
+            UIView.animateWithDuration(0.4, animations: { () -> Void in
                 self.chat!.frame.origin.y = 0.0
             })
         }
     }
-    
-    func addMessageToQ(message: String){
-        messageQ = messageQ.arrayByAddingObject(message)
-        chatBadge?.text = String(messageQ.count)
-        chatBadge?.hidden = false
-        showControlPanel()
-    }
-    
-    func releaseMessageQ(){
-        if (messageQ.count > 0){
-            for message in messageQ {
-                self.chat!.addChatBox(message as! String, isSelf: false)
-            }
-            messageQ = []
-            chatBadge.hidden = true
-        }
-    }
-    
     
     @IBAction func videoButtonPressed(sender: AnyObject) {
         if let pVideo = CallUtils.publisher?.publishVideo{
@@ -922,12 +1009,32 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         self.parentViewController?.navigationController?.navigationBarHidden = false
     }
     
+    // MARK: - chat methods
+    
+    func addMessageToQ(message: String){
+        messageQ = messageQ.arrayByAddingObject(message)
+        chatBadge?.text = String(messageQ.count)
+        chatBadge?.hidden = false
+        showControlPanel()
+    }
+    
+    func releaseMessageQ(){
+        if (messageQ.count > 0){
+            for message in messageQ {
+                self.chat!.addChatBox(message as! String, isSelf: false)
+            }
+            messageQ = []
+            chatBadge.hidden = true
+        }
+    }
+    
+    // TODO: put this somewhere else
     func closeOpenPanels(){
         self.signView?.hidden = true
         self.addTextView?.hidden = true
     }
     
-    // MARK: insert signature methods
+    // MARK: - insert signature methods
     
     func onSignViewClose(sender: UIView){
         self.signView?.hidden = true
@@ -986,13 +1093,12 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         if currentImageUrl != nil {
             modifiedImages[currentImageUrl!] = image
         }
-        if currentPage != nil && currentDocument != nil {
-            setImageAtIndex(image, document: currentDocument!, page: currentPage!)
-        }
+        
+        setImageAtIndex(image, document: currentDocument, page: currentPage)
 
         newDictionary["call"] = CallUtils.currentCall!["id"] as! NSNumber
-        newDictionary["page_number"] = self.currentPage!
-        newDictionary["document_id"] = self.currentDocument!
+        newDictionary["page_number"] = self.currentPage
+        newDictionary["document_id"] = self.currentDocument
         newDictionary["tracking"] = randomStringWithLength(16)
         newDictionary["type"] = "signature"
 
@@ -1049,8 +1155,6 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         scaledTextView.text = textView.text
         scaledTextView.font = textView.font!.fontWithSize(textView.font!.pointSize*scaleRatio/zoom)
         
-        
-        
         let scaledTextImage = takeScreenshot(scaledTextView)
         UIGraphicsBeginImageContext(document.size)
         document.drawInRect(CGRectMake(0,0,document.size.width, document.size.height))
@@ -1062,9 +1166,8 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         if currentImageUrl != nil {
             modifiedImages[currentImageUrl!] = image
         }
-        if currentPage != nil && currentDocument != nil {
-            setImageAtIndex(image, document: currentDocument!, page: currentPage!)
-        }
+        
+        setImageAtIndex(image, document: currentDocument, page: currentPage)
         
     }
     
@@ -1080,28 +1183,26 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         CallUtils.sendJsonMessage("add_text", data: newDictionary)
         
         newDictionary["call"] = CallUtils.currentCall!["id"] as! NSNumber
-        newDictionary["page_number"] = self.currentPage!
-        newDictionary["document_id"] = self.currentDocument!
-        newDictionary["tracking"] = randomStringWithLength(16) // NSUUID().UUIDString
+        newDictionary["page_number"] = self.currentPage
+        newDictionary["document_id"] = self.currentDocument
+        newDictionary["tracking"] = randomStringWithLength(16)
+        newDictionary["font_size"] = textView.font?.pointSize
         newDictionary["type"] = "text"
         
         ServerAPI.sharedInstance.newModification(newDictionary, completion: { (result) -> Void in})
         
     }
     
-    // MARK: hanlde incoming events
-    
     enum SignalsType : String{
         case Send_Meta_Data = "send_meta_data"
-        case Load_Res_With_Index = "load_res_with_index"
-        case Preload_Res_With_Index = "preload_res_with_index"
-        case Chat_Text = "chat_text"
+        case Load_Res_With_Index = "load_res_with_index"            // load specific page immediately
+        case Preload_Res_With_Index = "preload_res_with_index"      // load other pages on background
+        case Chat_Text = "chat_text"                                // chat message
         case Line_Start_Point = "line_start_point"
         case Line_Point = "line_point"
         case Line_Clear = "line_clear"
         case Pointer_Position = "pointer_position"
         case Pointer_Hide = "pointer_hide"
-        case Zoom_Scale = "zoom_scale"
         case Signature_Points = "signature_points"
         case Add_Text = "add_text"
         case Ask_For_Photo = "ask_for_photo"
@@ -1111,8 +1212,96 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         case Ask_To_Lock = "ask_to_lock"
         case Erase_Frame = "erase_frame" // not for now
         case Close_Rep_Box = "close_box"
-        case Clean_Page = "clean_page" // not for now
+        case Clean_Page = "clean_page"
     }
+    
+    // MARK: outgoing messages
+    
+    func sendCloseBoxRequest(isTextBox: Bool) {
+        let dictionary = ["text_box": isTextBox, "sign_box": !isTextBox]
+        CallUtils.sendJsonMessage(SignalsType.Close_Rep_Box.rawValue, data: dictionary)
+    }
+    
+    func sendMetaDataRequest(dictionary: Dictionary<String,AnyObject>) {
+        CallUtils.sendJsonMessage(SignalsType.Send_Meta_Data.rawValue, data: dictionary)
+    }
+    
+    func sendLoadResWithIndexRequest(index: Int) {
+        let page = getCurrentPage(index)
+        let data = ["page": index, "document": self.getSelectedResourceId(), "url": page.url!, "pageId": page.pageResourceId!] as Dictionary<String, AnyObject>
+        CallUtils.sendJsonMessage(SignalsType.Load_Res_With_Index.rawValue, data: data)
+    }
+    
+    func sendPreloadResRequest() {
+        let doc = getDocumentById(currentDocument)
+        doc.pages.sortInPlace({$0.index < $1.index})
+        var data = Dictionary<String, AnyObject>()
+        for page in doc.pages {
+            data = ["page": page.index!, "document": doc.id!, "url": page.url!]
+            CallUtils.sendJsonMessage(SignalsType.Preload_Res_With_Index.rawValue, data: data)
+        }
+    }
+    
+    func openInputPanelOnRemote(sender: UIGestureRecognizer, panelType: PanelType) {
+        let touchLocation = sender.locationInView(self)
+        let originPoint = getOriginFromCenterPoint(touchLocation)
+        let zoom = scrollView!.zoomScale
+        let scaleRatio = getScaleRatio()
+        
+        let isTextPanel: Bool?
+        let panelView: UIView?
+        
+        switch panelType {
+        case .text_panel:
+            isTextPanel = true
+            panelView = self.addTextView
+            (panelView as! TextDocumentPanelView).openedOnRemoteSide(touchLocation)
+            break
+        case .sign_panel:
+            isTextPanel = false
+            panelView = self.signView
+            (panelView as! SignDocumentPanelView).openedOnRemoteSide(touchLocation)
+        }
+
+        panelView?.hidden = false
+        
+        let relativeSize = getRelativeSize(CGSizeMake(panelView!.frame.width, panelView!.frame.height), zoom: zoom, scaleRatio: scaleRatio)
+         let data = ["showTextPanel":isTextPanel!, "showSignPanel": !isTextPanel!, "top": originPoint.y, "left": originPoint.x, "height": relativeSize.height, "width": relativeSize.width] as Dictionary<String, AnyObject>
+
+        CallUtils.sendJsonMessage(SignalsType.Open_Rep_Box.rawValue, data: data)
+        
+    }
+    
+    func getOriginFromCenterPoint(origin: CGPoint) -> CGPoint {
+        let document = presentaionImage!.image!
+        let screen =  UIScreen.mainScreen().bounds
+        let zoom = scrollView!.zoomScale
+        
+        //Image is aspect fit, scale factor will be the biggest change on image
+        let scaleRatio = max(document.size.width/screen.width, document.size.height/screen.height)
+        
+        //One of these have to be 0
+        let heightDiff = (screen.height*scaleRatio) - document.size.height
+        let widthDiff = (screen.width*scaleRatio) - document.size.width
+        
+        
+        let X = (origin.x+scrollView!.contentOffset.x)/zoom
+        let Y = (origin.y+scrollView!.contentOffset.y)/zoom
+        return CGPointMake(((X*scaleRatio)-widthDiff/2)/document.size.width,((Y*scaleRatio)-heightDiff/2)/document.size.height)
+    }
+    
+    func getRelativeSize(panelSize: CGSize, zoom: CGFloat, scaleRatio: CGFloat) -> CGSize {
+        let document = presentaionImage.image!
+        
+        return CGSizeMake(panelSize.width/((document.size.width/scaleRatio)*zoom), panelSize.height/((document.size.height/scaleRatio)*zoom))
+    }
+    
+    func getWidth(inputView: UIView, scale: CGFloat) -> CGSize {
+        return CGSizeMake(inputView.frame.width/scale, inputView.frame.height/scale)
+    }
+
+    
+    // MARK: incoming events
     
     func handleSignal(session: OTSession!, receivedSignalType type: String!, fromConnection connection: OTConnection!, withString string: String!) {
         
@@ -1121,7 +1310,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         switch type {
             
         case SignalsType.Send_Meta_Data.rawValue:
-            sendMetaData()
+            sendMetaDataRequest(["platform": "iosSDK"])
             break
         case SignalsType.Load_Res_With_Index.rawValue: // called only on client side
             loadResourcesWithIndex(string)
@@ -1146,9 +1335,6 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             break
         case SignalsType.Pointer_Hide.rawValue:
             handlePointerHide()
-            break
-        case SignalsType.Zoom_Scale.rawValue:
-            handleZoomScale(string)
             break
         case SignalsType.Signature_Points.rawValue:
             handleSignaturePoints(string)
@@ -1202,8 +1388,15 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     }
     
     func handleEraseFrame(string: String) {
-        if let data = CallUtils.convertStringToDictionary(string) {
-            print(data)
+        if var data = CallUtils.convertStringToDictionary(string) {
+            data["zoom"] = 1
+            let document = presentaionImage!.image!
+            let blankFrame = calculateFrameForView(data)
+            let blankView = UIView(frame: blankFrame)
+            blankView.backgroundColor = UIColor.whiteColor()
+            let scaledTextImage = takeScreenshot(blankView)
+            drawObjectOnDocument(document, data: data, newViewFrame: blankView.frame, newImage: scaledTextImage)
+            
         }
     }
     
@@ -1212,10 +1405,8 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             if let val = data["type"] as? String {
                 if val == "text_box" {
                     self.addTextView?.hidden = true
-                    self.signView?.hidden = true
                 } else {
                     self.signView?.hidden = true
-                    self.addTextView?.hidden = true
                 }
             }
         }
@@ -1252,7 +1443,6 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         CallUtils.sendJsonMessage("confirm_lock", data: data)
     }
     
-    
     func handleFontChange(string: String) {
         if let data = CallUtils.convertStringToDictionary(string) {
             if let document = self.presentaionImage?.image {
@@ -1261,13 +1451,12 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             }
         }
     }
-    
+
     func handleOpenBox(string: String) {
 
         if let box = CallUtils.convertStringToDictionary(string) {
             
             let document = self.presentaionImage!.image!
-
             let top = box["top"] as! CGFloat*document.size.height
             let left = (box["left"] as! CGFloat)*document.size.width
             let width = box["width"] as! CGFloat*document.size.width
@@ -1331,29 +1520,47 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     }
     
     func getScaleRatio() -> CGFloat {
-        let screen = UIScreen.mainScreen().bounds
-        let document = presentaionImage!.image!
-        return max(document.size.width/screen.width, document.size.height/screen.height)
-    }
-    
-    func calculateScale(width: CGFloat, height: CGFloat, scaleRatio: CGFloat, isSignPanel: Bool) -> CGFloat {
-
-        let document = presentaionImage!.image!
-
-        let containerWidth = document.size.width/scaleRatio
-        let relativeWidth = containerWidth * width
-        let objectWidth: CGFloat?
         
-        if isSignPanel {
-            objectWidth = signPanelWidth
-        } else {
-            objectWidth = textPanelWidth
+        let document = presentaionImage!.image!
+        var bounds = UIScreen.mainScreen().bounds.size
+        
+        if(UIDeviceOrientationIsLandscape(UIDevice.currentDevice().orientation)){
+            bounds = CGSizeMake(max(bounds.height, bounds.width), min(bounds.height, bounds.width))
+        }
+        if(UIDeviceOrientationIsPortrait(UIDevice.currentDevice().orientation)){
+            bounds = CGSizeMake(min(bounds.height, bounds.width), max(bounds.height, bounds.width))
         }
         
-        let zoomScale = objectWidth! / relativeWidth
-        
-        return zoomScale
+        // Image is aspect fit, scale factor will be the biggest change on image
+        return max(document.size.width/bounds.width, document.size.height/bounds.height)
     }
+
+    
+    func sendTranslateAndScale() {
+
+        let documentImage = presentaionImage.image!
+        let current_x = scrollView.contentOffset.x
+        let current_y = scrollView.contentOffset.y
+        
+        let imageSize = getImageSize(documentImage, scaleRatio: getScaleRatio())
+        let imageWidth = imageSize.width
+        let imageHeight = imageSize.height
+        
+        let scale = scrollView!.zoomScale
+        let X = (imageWidth*(scale - 1)/2) - current_x
+        let Y = (imageHeight*(scale - 1)/2) - current_y
+        
+        let data = ["translate" : ["x": X, "y": Y], "image_width": imageWidth, "image_height": imageHeight, "scale": scale] as Dictionary<String, AnyObject>
+        
+        CallUtils.sendJsonMessage(SignalsType.Translate_And_Scale.rawValue, data: data)
+
+    }
+    
+    // image size is the size of the image the user sees (screen - image spaces from bounds)
+    func getImageSize(documentImage: UIImage, scaleRatio: CGFloat) -> CGSize {
+        return CGSizeMake(documentImage.size.width/scaleRatio, documentImage.size.height/scaleRatio)
+    }
+
     
     func handleTranslateAndScale(string: String) {
         if let data = CallUtils.convertStringToDictionary(string) {
@@ -1394,28 +1601,27 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         }
         
     }
-    func sendMetaData() {
-        let newDictionary = ["platform": "iosSDK"]
-        CallUtils.sendJsonMessage(SignalsType.Send_Meta_Data.rawValue, data: newDictionary)
-    }
+//    func sendMetaData() {
+//        let newDictionary = ["platform": "iosSDK"]
+//        CallUtils.sendJsonMessage(SignalsType.Send_Meta_Data.rawValue, data: newDictionary)
+//    }
     
     func loadResourcesWithIndex(string: String) {
-        
-        // TODO:
+
         presentationWebView?.hidden = true
         presentationWebView?.loadHTMLString("", baseURL:nil)
         scrollView?.setZoomScale(1.0, animated: false)
 
         if let data = CallUtils.convertStringToDictionary(string) {
 
-            currentDocument = data["document"] as? Int
-            currentPage = data["page"] as? Int
-            if let image = getImageAtIndex(currentDocument!, page: currentPage!){
+            currentDocument = data["document"] as! Int
+            currentPage = data["page"] as! Int
+            if let image = getImageAtIndex(currentDocument, page: currentPage){
                 dispatch_async(dispatch_get_main_queue()){
                     self.presentaionImage.image = image
                 }
             } else {
-                setImageFromURL(data["url"] as! String, document: currentDocument!, page: currentPage!, completion: { (result) -> Void in
+                setImageFromURL(data["url"] as! String, document: currentDocument, page: currentPage, completion: { (result) -> Void in
                     dispatch_async(dispatch_get_main_queue()){
                         self.presentaionImage.image = result
                     }
@@ -1646,9 +1852,9 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         let image: UIImage = signedDoc
         self.presentaionImage?.image = image
         
-        if currentPage != nil && currentDocument != nil {
-            setImageAtIndex(image, document: currentDocument!, page: currentPage!)
-        }
+//        if currentPage != nil && currentDocument != nil {
+            setImageAtIndex(image, document: currentDocument, page: currentPage)
+//        }
     }
     
     func getPointFromPointStr(pointStr: String, scaleRatio: CGFloat, zoom: CGFloat?)-> CGPoint?{
@@ -1682,14 +1888,18 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         return doc
     }
     
-    func addPageToDocument(docId: Int, pageIndex: Int, image: UIImage, url: String) {
+    func addPageToDocument(docId: Int, pageIndex: Int, image: UIImage, url: String, pageId: Int? = nil) {
         let doc = self.getDocumentById(docId)
         for page in doc.pages {
             if page.index == pageIndex {
                 return
             }
         }
-        doc.pages.append(Page(withDictionary: ["document":docId, "index":pageIndex, "image": image, "url": url]))
+        var dictionary = ["document":docId, "index":pageIndex, "image": image, "url": url] as Dictionary<String, AnyObject>
+        if pageId != nil {
+            dictionary["pageId"] = pageId
+        }
+        doc.pages.append(Page(withDictionary: dictionary))
     }
     
     func getPageByIndex(doc: Document, index: Int) -> Page? {
@@ -1699,6 +1909,11 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             }
         }
         return nil
+    }
+    
+    func getCurrentPage(index: Int) -> Page {
+        let document = preLoadedImages[self.selectedResIndex]
+        return getPageByIndex(document, index: index)!
     }
 
 }

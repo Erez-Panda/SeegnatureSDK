@@ -29,6 +29,13 @@ public class SeegnatureActions: NSObject {
         }
     }
     
+    public func resetUserPassword(email: Dictionary<String, AnyObject>, completion: (result: NSDictionary) -> Void) {
+        printLog("Sending reset password request")
+        ServerAPI.sharedInstance.resetUserPassword(email, completion: { (result) -> Void in
+            completion(result: result)
+        })
+    }
+    
     public func getUserDetails(completion: (result: NSDictionary) -> Void) -> Void{
         printLog("Getting user info")
         ServerAPI.sharedInstance.getUser({result -> Void in

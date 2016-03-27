@@ -16,6 +16,15 @@ func printLog(logMessage: AnyObject, functionName: String = __FUNCTION__) {
     print("----------------------------------")
 }
 
+enum PanelType: Int {
+    case text_panel = 0
+    case sign_panel = 1
+}
+
+@objc protocol InputPanelsDelegate{
+    optional func openedOnRemoteSide()
+}
+
 extension UIView {
     
     func addBorder(borderColor: UIColor, borderWidth: CGFloat = 1) {

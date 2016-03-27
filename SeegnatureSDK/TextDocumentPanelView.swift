@@ -8,7 +8,7 @@
 
 import UIKit
 
-class TextDocumentPanelView: UIView, UITextFieldDelegate {
+class TextDocumentPanelView: UIView, UITextFieldDelegate, InputPanelsDelegate {
     
     var onAdd: ((textView: UITextField, origin: CGPoint) -> ())?
     var onClose: ((sender: UIView) -> ())?
@@ -17,8 +17,11 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate {
     var center_y_constraint: NSLayoutConstraint?
     
     var last_open_box_info: String?
+    var isOpenedOnRemoteSide = false
     
     @IBOutlet weak var textFieldView: UITextField!
+    @IBOutlet weak var addButton: UIButton!
+    @IBOutlet weak var moveButton: NIKFontAwesomeButton!
     
     override func awakeFromNib() {
         self.layer.cornerRadius = 8
@@ -30,6 +33,22 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate {
         self.translatesAutoresizingMaskIntoConstraints = false
     }
     
+    func openedOnRemoteSide(touchLocation: CGPoint) {
+
+        dispatch_async(dispatch_get_main_queue()){
+            self.moveButton.backgroundColor = UIColor.grayColor()
+            self.moveButton.color = UIColor.whiteColor()
+            self.addButton.backgroundColor = UIColor.grayColor()
+            self.userInteractionEnabled = false
+        }
+
+        let bounds = UIScreen.mainScreen().bounds
+        self.center_x_constraint?.constant = touchLocation.x - bounds.width/2
+        self.center_y_constraint?.constant = touchLocation.y - bounds.height/2
+        self.isOpenedOnRemoteSide = true
+        
+    }
+    
     override var hidden: Bool {
         get {
             return super.hidden
@@ -39,6 +58,18 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate {
             self.last_open_box_info = nil
             if (self.textFieldView != nil) {
                 self.textFieldView.text = ""
+                self.addButton.backgroundColor = ColorUtils.uicolorFromHex(0x67CA94)
+                self.moveButton.color = UIColor.whiteColor()
+                self.moveButton.backgroundColor = ColorUtils.uicolorFromHex(0x67CA94)
+                if self.isOpenedOnRemoteSide {
+                    self.userInteractionEnabled = false
+                } else {
+                    self.userInteractionEnabled = true
+                }
+                if v {
+                    self.isOpenedOnRemoteSide = false
+                }
+                (self.superview as! SessionView).scrollView.scrollEnabled = v
             }
         }
     }
@@ -69,12 +100,10 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate {
         textFieldView.resignFirstResponder()
         let offset = CGPointMake(frame.origin.x + textFieldView.frame.origin.x, frame.origin.y + textFieldView.frame.origin.y)
         onAdd?(textView:textFieldView, origin: offset)
-//        self.removeFromSuperview()
         self.hidden = true
         self.textFieldView.text = ""
     }
     @IBAction func cancel(sender: AnyObject) {
-//        self.removeFromSuperview()
         self.hidden = true
         onClose?(sender: self)
     }

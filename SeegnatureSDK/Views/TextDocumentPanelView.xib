@@ -117,6 +117,8 @@
                 </mask>
             </variation>
             <connections>
+                <outlet property="addButton" destination="D3I-ih-Es2" id="GqD-WS-20q"/>
+                <outlet property="moveButton" destination="hkD-re-f6Q" id="ane-Fr-oYy"/>
                 <outlet property="textFieldView" destination="M2w-Tg-Usm" id="864-4Z-Aso"/>
             </connections>
             <point key="canvasLocation" x="293.5" y="261"/>
