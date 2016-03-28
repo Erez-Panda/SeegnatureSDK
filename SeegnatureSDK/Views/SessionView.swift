@@ -477,10 +477,9 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
                     "file": fileId
                 ]
                 ServerAPI.sharedInstance.newResource(res, completion: { (result) -> Void in
-                    printLog(result)                    
-                    if nil != result["id"] as? Int{
+                    if let newDocumentId = result["id"] as? Int{
                         self.resources?.append(result as! Dictionary<String, AnyObject>)
-                        
+                        self.getDocumentById(newDocumentId)
                         self.down(UISwipeGestureRecognizer())
                     }
                 })
