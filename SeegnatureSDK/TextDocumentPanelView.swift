@@ -39,6 +39,7 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate, InputPanelsDelegate {
             self.moveButton.backgroundColor = UIColor.grayColor()
             self.moveButton.color = UIColor.whiteColor()
             self.addButton.backgroundColor = UIColor.grayColor()
+            self.layer.borderColor = UIColor.grayColor().CGColor
             self.userInteractionEnabled = false
         }
 
@@ -61,6 +62,7 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate, InputPanelsDelegate {
                 self.addButton.backgroundColor = ColorUtils.uicolorFromHex(0x67CA94)
                 self.moveButton.color = UIColor.whiteColor()
                 self.moveButton.backgroundColor = ColorUtils.uicolorFromHex(0x67CA94)
+                self.layer.borderColor = ColorUtils.uicolorFromHex(0x67CA94).CGColor                
                 if self.isOpenedOnRemoteSide {
                     self.userInteractionEnabled = false
                 } else {

@@ -40,6 +40,7 @@ class SignDocumentPanelView: UIView, InputPanelsDelegate {
             self.moveButton.backgroundColor = UIColor.grayColor()
             self.moveButton.color = UIColor.whiteColor()
             self.SignButton.backgroundColor = UIColor.grayColor()
+            self.layer.borderColor = UIColor.grayColor().CGColor
             self.userInteractionEnabled = false
         }
         
@@ -61,6 +62,7 @@ class SignDocumentPanelView: UIView, InputPanelsDelegate {
                 self.SignButton.backgroundColor = ColorUtils.uicolorFromHex(0x67CA94)
                 self.moveButton.color = UIColor.whiteColor()
                 self.moveButton.backgroundColor = ColorUtils.uicolorFromHex(0x67CA94)
+                self.layer.borderColor = ColorUtils.uicolorFromHex(0x67CA94).CGColor
                 if self.isOpenedOnRemoteSide {
                     self.userInteractionEnabled = false
                 } else {

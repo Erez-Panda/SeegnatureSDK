@@ -110,6 +110,14 @@ extension String {
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
         return dateFormatter.dateFromString(self)!
     }
+    
+    
+    func subString(startIndex: Int, length: Int) -> String
+    {
+        let start = self.characters.startIndex.advancedBy(startIndex)
+        let end = self.characters.startIndex.advancedBy(startIndex+length)
+        return self.substringWithRange(Range<String.Index>(start: start, end: end))
+    }
 }
 
 extension NSMutableData {

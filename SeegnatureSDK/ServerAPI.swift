@@ -34,12 +34,17 @@ class ServerAPI {
         if let res = result as? NSArray {
             return res
         } else {
+            if let res = result as? NSData {
+                let arr_as_string = String(NSString(data: res, encoding: NSUTF8StringEncoding)!)
+                let arr_first_object = arr_as_string.subString(1, length: arr_as_string.characters.count-2)
+                let d = CallUtils.convertStringToDictionary(arr_first_object)
+                return [d!]
+            }
             return []
         }
     }
     
     func getDictionaryResult(result: AnyObject) ->NSDictionary {
-        print(result)
         if let res = result as? NSDictionary {
             return res
         } else {

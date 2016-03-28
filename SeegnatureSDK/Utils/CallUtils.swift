@@ -240,9 +240,9 @@ struct CallUtils{
         if let screenSubscriber = self.screenSubscriber {
             var maybeError : OTError?
             session?.unsubscribe(screenSubscriber, error: &maybeError)
-            if let error = maybeError {
+//            if let error = maybeError {
 //                ViewUtils.showAlert("OTError", message: error.localizedDescription)
-            }
+//            }
             
             screenSubscriber.view.removeFromSuperview()
             self.screenSubscriber = nil
@@ -273,9 +273,9 @@ struct CallUtils{
         if let subscriber = self.subscriber {
             var maybeError : OTError?
             session?.unsubscribe(subscriber, error: &maybeError)
-            if let error = maybeError {
-                ViewUtils.showAlert("OTError", message: error.localizedDescription)
-            }
+//            if let error = maybeError {
+//                ViewUtils.showAlert("OTError", message: error.localizedDescription)
+//            }
             
             subscriber.view.removeFromSuperview()
             self.subscriber = nil
@@ -286,9 +286,9 @@ struct CallUtils{
         if let publisher = self.publisher {
             var maybeError : OTError?
             session?.unpublish(publisher, error: &maybeError)
-            if let error = maybeError {
-                ViewUtils.showAlert("OTError", message: error.localizedDescription)
-            }
+//            if let error = maybeError {
+//                ViewUtils.showAlert("OTError", message: error.localizedDescription)
+//            }
             
             publisher.view.removeFromSuperview()
             self.publisher = nil
@@ -299,9 +299,9 @@ struct CallUtils{
         if let screenPublisher = self.screenPublisher {
             var maybeError : OTError?
             session?.unpublish(screenPublisher, error: &maybeError)
-            if let error = maybeError {
-                ViewUtils.showAlert("OTError", message: error.localizedDescription)
-            }
+//            if let error = maybeError {
+//                ViewUtils.showAlert("OTError", message: error.localizedDescription)
+//            }
             
             //screenPublisher.view.removeFromSuperview()
             //self.screenPublisher = nil

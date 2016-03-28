@@ -86,8 +86,8 @@
                         <action selector="toggleToolsPanel:" destination="ve8-An-joz" eventType="touchUpInside" id="EVM-2A-NQs"/>
                     </connections>
                 </button>
-                <view alpha="0.85000002384185791" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eTW-U9-gai" userLabel="tools panel">
-                    <rect key="frame" x="0.0" y="40" width="60" height="440"/>
+                <view alpha="0.85000002384185791" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eTW-U9-gai" userLabel="tools panel">
+                    <rect key="frame" x="-60" y="40" width="60" height="440"/>
                     <subviews>
                         <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Gwq-Vc-QTN">
                             <rect key="frame" x="0.0" y="0.0" width="60" height="392"/>

@@ -87,8 +87,6 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     var showNextSlide = false
     var drawingMode = false
     var toolsPanelHidden = true
- 
-    private var kvoContext = 0
     
     // MARK: - init methods
     
@@ -105,10 +103,14 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         addScreenRotationNotification()
         
     }
-    
-//    override func willMoveToSuperview(newSuperview: UIView?) {
-//        self.parentViewController?.navigationController?.navigationBarHidden = true
-//    }
+
+    override func willMoveToSuperview(newSuperview: UIView?) {
+        var val = true
+        if Session.sharedInstance.disconnectingCall == true {
+            val = false
+        }
+        self.parentViewController?.navigationController?.navigationBarHidden = val
+    }
 
     func initClientSession() {
         self.toggleToolsButton.hidden = true
@@ -216,7 +218,24 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
                 }
             }
         } else {
-            self.next(UISwipeGestureRecognizer())
+            let doc = getDocumentById(preLoadedImages[index].id!)
+            ServerAPI.sharedInstance.getResourceDisplay(doc.id!, completion: { (result) -> Void in
+                if result.count > 0 {
+                    self.displayResources = result
+                } else {
+                    self.displayResources = nil
+                }
+                if let dispRes = self.displayResources?[0] as? NSDictionary{
+                    self.loadImage(dispRes["id"] as! NSNumber)
+                }
+                if self.currentSession!.isRep == true {
+                    self.preLoadDisplayResources({
+                        if self.sentRemoteSideData == false {
+                            self.remoteSideConnected()
+                        }
+                    })
+                }
+            })
         }
     }
 
@@ -477,9 +496,9 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
                     "file": fileId
                 ]
                 ServerAPI.sharedInstance.newResource(res, completion: { (result) -> Void in
-                    if let newDocumentId = result["id"] as? Int{
-                        self.resources?.append(result as! Dictionary<String, AnyObject>)
-                        self.getDocumentById(newDocumentId)
+                    if let newDocDictionary = result as? Dictionary<String, AnyObject> {
+                        self.resources?.append(newDocDictionary)
+                        let doc = self.addNewDocument(result as! Dictionary<String, AnyObject>)
                         self.down(UISwipeGestureRecognizer())
                     }
                 })
@@ -1736,6 +1755,8 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         } else {
             printLog("JSON conversion failed")
         }
+        
+        self.signView?.hidden = true
     }
     
     func handleAddText(string: String) {
@@ -1749,7 +1770,6 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             } else {
                 data["zoom"] = 1 as CGFloat
             }
-            
 
             let originalScaling = getOriginalScaling(data)
             let textFrame = calculateFrameForView(data)
@@ -1764,8 +1784,9 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             
             let scaledTextImage = takeScreenshot(remoteTextView)
             drawObjectOnDocument(document, data: data, newViewFrame: remoteTextView.frame, newImage: scaledTextImage)
-            
         }
+        
+        self.addTextView?.hidden = true
     }
     
     func handleAskForPhoto() {
@@ -1887,6 +1908,12 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             }
         }
         let doc = Document(withDictionary: ["id": id])
+        self.preLoadedImages.append(doc)
+        return doc
+    }
+    
+    func addNewDocument(dictionary: Dictionary<String, AnyObject>) -> Document {
+        let doc = Document(withDictionary: dictionary)
         self.preLoadedImages.append(doc)
         return doc
     }

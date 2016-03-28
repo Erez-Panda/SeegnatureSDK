@@ -35,8 +35,6 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
             
             completion(result: result)
 
-//            CallUtils.getCallerImage()
-
         })
         
     }
