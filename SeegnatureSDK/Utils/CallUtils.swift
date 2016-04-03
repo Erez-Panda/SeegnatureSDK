@@ -334,6 +334,22 @@ struct CallUtils{
         }
         return nil
     }
+    
+    static func convertStringToArray(text: String) -> [AnyObject]? {
+        if let data = text.dataUsingEncoding(NSUTF8StringEncoding) {
+            var json: [AnyObject]?
+            do {
+                json = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableLeaves) as? [AnyObject]
+            } catch let error as NSError {
+                printLog(error)
+                json = nil
+            } catch {
+                fatalError()
+            }
+            return json
+        }
+        return nil
+    }
 
 }
 
