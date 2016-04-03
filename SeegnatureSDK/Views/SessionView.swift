@@ -297,13 +297,14 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         sendMetaDataRequest([:])
         sendLoadResWithIndexRequest(currentPage)
         sendPreloadResRequest()
+        sendFontChange()
         sentRemoteSideData = true
     }
     
 
     
     func handleRemoteSideConnectedAsRep() {
-    
+
     }
     
     // MARK: - uiscrollview delegate
@@ -498,7 +499,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
                 ServerAPI.sharedInstance.newResource(res, completion: { (result) -> Void in
                     if let newDocDictionary = result as? Dictionary<String, AnyObject> {
                         self.resources?.append(newDocDictionary)
-                        let doc = self.addNewDocument(result as! Dictionary<String, AnyObject>)
+                        let _ = self.addNewDocument(result as! Dictionary<String, AnyObject>)
                         self.down(UISwipeGestureRecognizer())
                     }
                 })
@@ -650,8 +651,13 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         let page = currentPage
         let url = getCurrentPage(page).url!
         let newDictionary: Dictionary<String, AnyObject>  = ["callId": callId, "document": documentId, "page": page, "url": url]
-        printLog(newDictionary)
+        if let document = preLoadedImages[safe: selectedResIndex] {
+            if let page = self.getPageByIndex(document, index: currentImageIndex) {
+                self.presentaionImage?.image = page.image
+            }
+        }
         CallUtils.sendJsonMessage(SignalsType.Clean_Page.rawValue, data: newDictionary)
+        
         hideRepToolsPanel()
     }
     
@@ -694,27 +700,11 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     }
     
     @IBAction func lockDocument(sender: NIKFontAwesomeButton) {
-        activity.color = UIColor.redColor()
-        activity.startAnimating()
-        if let id = CallUtils.currentCall?["id"] as? NSNumber{
-            ServerAPI.sharedInstance.lockDocument(["call": id, "document": self.getSelectedResourceId()]) { (result) -> Void in
-                dispatch_async(dispatch_get_main_queue()){
-                    self.activity.stopAnimating()
-                    self.activity.color = UIColor.grayColor()
-                    
-                    var title = "Document Locked"
-                    var message = "Email with the signed document will be sent to you shortly"
-
-                    if nil==result["success"]{
-                        title = "Lock Error"
-                        message = "No change detected in document"
-                    }
-                    ViewUtils.showAlert(title, message: message)
-                }
-            }
-        }
-        
+        ViewUtils.showAlert("Lock Request", message: "A lock request has been sent to the client")
+        CallUtils.sendJsonMessage(SignalsType.Ask_To_Lock.rawValue, data: [:])
     }
+    
+    
     
     @IBAction func stopSharing(sender: NIKFontAwesomeButton) {
         stopSharing()
@@ -1023,6 +1013,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         Session.sharedInstance.disconnectingCall = true
         CallUtils.stopCall()
         CallUtils.incomingViewController = nil
+        self.preLoadedImages.removeAll()
         self.removeFromSuperview()
         Session.sharedInstance.disconnectingCall = false
         self.parentViewController?.navigationController?.navigationBarHidden = false
@@ -1209,7 +1200,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         newDictionary["type"] = "text"
         
         ServerAPI.sharedInstance.newModification(newDictionary, completion: { (result) -> Void in})
-        
+
     }
     
     enum SignalsType : String{
@@ -1232,6 +1223,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         case Erase_Frame = "erase_frame" // not for now
         case Close_Rep_Box = "close_box"
         case Clean_Page = "clean_page"
+        case Confirm_Lock = "confirm_lock"
     }
     
     // MARK: outgoing messages
@@ -1261,6 +1253,13 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         for page in doc.pages {
             data = ["page": page.index!, "document": doc.id!, "url": page.url!]
             CallUtils.sendJsonMessage(SignalsType.Preload_Res_With_Index.rawValue, data: data)
+        }
+    }
+    
+    func sendFontChange() {
+        if let document = self.presentaionImage?.image {
+            let newFontSize = self.addTextView!.textFieldView.font!.pointSize / document.size.width
+                CallUtils.sendJsonMessage(SignalsType.Text_Font_Change.rawValue, data: ["newSize": newFontSize])
         }
     }
     
@@ -1387,6 +1386,10 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             break
         case SignalsType.Clean_Page.rawValue:
             handleCleanPage(string)
+            break
+        case SignalsType.Confirm_Lock.rawValue:
+            handleLockRespose(string)
+            break
         default:
             printLog("Couldn't find an event")
         }
@@ -1444,25 +1447,49 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             
             let yesAction = UIAlertAction(title: "YES", style: .Default) { (action:UIAlertAction!) in
                 print("Yes button pressed")
-                
-                self.handleLockResponse(data, val: true)
+                self.sendLockResponse(data, val: true)
             }
             
             let noAction = UIAlertAction(title: "NO", style: .Default) { (action:UIAlertAction!) in
                 print("No button pressed");
-                self.handleLockResponse(data, val: false)
+                self.sendLockResponse(data, val: false)
             }
             
             alertController.addAction(yesAction)
             alertController.addAction(noAction)
-            
+
             self.parentViewController!.presentViewController(alertController, animated: true, completion: nil)
         }
     }
     
-    func handleLockResponse(var data: Dictionary<String, AnyObject>, val: Bool) {
+    func sendLockResponse(var data: Dictionary<String, AnyObject>, val: Bool) {
         data["lock"] = val
-        CallUtils.sendJsonMessage("confirm_lock", data: data)
+        CallUtils.sendJsonMessage(SignalsType.Confirm_Lock.rawValue, data: data)
+    }
+    
+    func handleLockRespose(string: String) {
+        if let data = CallUtils.convertStringToDictionary(string) {
+            if let val = data["lock"] as? Bool {
+                if val == true {
+                    if let id = CallUtils.currentCall?["id"] as? NSNumber{
+                        ServerAPI.sharedInstance.lockDocument(["call": id, "document": self.getSelectedResourceId()]) { (result) -> Void in
+                            dispatch_async(dispatch_get_main_queue()){
+                                var title = "Document Locked"
+                                var message = "Email with the signed document will be sent to you shortly"
+                                
+                                if nil==result["success"]{
+                                    title = "Lock Error"
+                                    message = "No change detected in document"
+                                }
+                                ViewUtils.showAlert(title, message: message)
+                            }
+                        }
+                    }
+                } else {
+                    ViewUtils.showAlert("Request Declined", message: "The client has rejected your request to lock the document")
+                }
+            }
+        }
     }
     
     func handleFontChange(string: String) {

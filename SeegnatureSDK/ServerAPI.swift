@@ -36,9 +36,13 @@ class ServerAPI {
         } else {
             if let res = result as? NSData {
                 let arr_as_string = String(NSString(data: res, encoding: NSUTF8StringEncoding)!)
-                let arr_first_object = arr_as_string.subString(1, length: arr_as_string.characters.count-2)
+                let arr_first_object = arr_as_string.subString(1, length: arr_as_string.lastIndexOf("]")!-1)
                 let d = CallUtils.convertStringToDictionary(arr_first_object)
-                return [d!]
+                if d != nil {
+                    return [d!]
+                } else {
+                    return []
+                }
             }
             return []
         }

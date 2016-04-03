@@ -118,6 +118,14 @@ extension String {
         let end = self.characters.startIndex.advancedBy(startIndex+length)
         return self.substringWithRange(Range<String.Index>(start: start, end: end))
     }
+    
+    func lastIndexOf(s: String) -> Int? {
+        if let r: Range<Index> = self.rangeOfString(s, options: .BackwardsSearch) {
+            return self.startIndex.distanceTo(r.startIndex)
+        }
+        
+        return Optional<Int>()
+    }
 }
 
 extension NSMutableData {

@@ -277,12 +277,12 @@ struct ViewUtils {
         showAlert("Error", message: message)
     }
     
-    static func showAlert(title: String, message: String) {
+    static func showAlert(title: String = "Error", message: String) {
         if (Session.sharedInstance.disconnectingCall == true) {
             return
         }
         
-        let alertController = UIAlertController(title: "Error", message: message, preferredStyle: .Alert)
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .Alert)
         
         let OKAction = UIAlertAction(title: "OK", style: .Default) { (action:UIAlertAction!) in
             print("OK button pressed");
