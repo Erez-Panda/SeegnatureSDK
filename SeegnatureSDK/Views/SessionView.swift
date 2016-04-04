@@ -553,11 +553,11 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         
         if CallUtils.screenSubscriber?.stream.videoType == OTStreamVideoType.Screen {
             if let view = CallUtils.screenSubscriber?.view {
+                self.addSubview(view)
                 let screenSize: CGRect = UIScreen.mainScreen().bounds
                 let ratio = CallUtils.subscriber!.stream.videoDimensions.height/CallUtils.subscriber!.stream.videoDimensions.width
-                view.frame.origin = CGPointMake(0, (screenSize.height - screenSize.width*ratio)/2)
-                view.frame.size = CGSizeMake(screenSize.width, screenSize.width*ratio)
-                self.insertSubview(view, belowSubview: drawingView)
+                view.addSizeConstaints(screenSize.width, height: screenSize.width*ratio)
+                view.setConstraintesToCenterSuperView(self)
             }
         } else if let view = CallUtils.subscriber?.view {
             self.addSubview(view)

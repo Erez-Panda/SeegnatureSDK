@@ -496,6 +496,14 @@
                 <constraint firstAttribute="bottom" secondItem="eTW-U9-gai" secondAttribute="bottom" constant="120" id="yaW-uV-bUK"/>
                 <constraint firstAttribute="centerX" secondItem="ggm-oD-ksO" secondAttribute="centerX" id="ytM-uv-Xps"/>
             </constraints>
+            <variation key="default">
+                <mask key="constraints">
+                    <exclude reference="2a3-V5-jU4"/>
+                    <exclude reference="RVi-DT-hQW"/>
+                    <exclude reference="aan-z7-hEd"/>
+                    <exclude reference="jjX-Ws-lZC"/>
+                </mask>
+            </variation>
             <connections>
                 <outlet property="activity" destination="5s1-S5-7vH" id="ob9-8m-a0i"/>
                 <outlet property="bottomView" destination="ggm-oD-ksO" id="32H-xN-z3L"/>
