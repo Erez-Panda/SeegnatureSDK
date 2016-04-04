@@ -311,6 +311,9 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     
     func scrollViewDidEndZooming(scrollView: UIScrollView, withView view: UIView?, atScale scale: CGFloat) {
         sendTranslateAndScale()
+        let scaleRatio = getScaleRatio()
+        let zoom = scrollView.zoomScale
+        self.addTextView!.setFontSize(scaleRatio, zoom: zoom)
     }
 
     func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
@@ -704,10 +707,16 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         CallUtils.sendJsonMessage(SignalsType.Ask_To_Lock.rawValue, data: [:])
     }
     
-    
-    
     @IBAction func stopSharing(sender: NIKFontAwesomeButton) {
         stopSharing()
+    }
+    
+    func hideDocumentImage() {
+        self.presentaionImage.hidden = true
+    }
+    
+    func showDocumentImage() {
+        self.presentaionImage.hidden = false
     }
     
     func stopSharing(){
@@ -908,18 +917,15 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         CallUtils.doPublish()
         
         ViewUtils.getTopViewController()!.dismissViewControllerAnimated(true, completion: { () -> Void in
-            
             if let id = CallUtils.currentCall?["id"] as? NSNumber{
                 let newName = "\(id)_Id_Image.jpg"
+                showSpinner("Uploading file")
                 ServerAPI.sharedInstance.uploadFile(UIImageJPEGRepresentation(image, 1.0)!, filename: newName) { (result) -> Void in
+                    hideSpinner()
                     if let file = result as? NSDictionary{
-                        
                         if let fileId = file["id"] as? NSNumber {
-                            
                             let newDictionary: Dictionary<String, AnyObject>  = ["file": fileId, "verify_id": true, "type": 1, "name": newName]
-                            
                             CallUtils.sendJsonMessage("new_call_document", data: newDictionary)
-                            
                             print("sent message")
                         }
                     }
@@ -1163,7 +1169,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         
         let scaledTextView = UITextField(frame: CGRectMake(0,0,textView.frame.width*scaleRatio/zoom, textView.frame.height*scaleRatio/zoom))
         scaledTextView.text = textView.text
-        scaledTextView.font = textView.font!.fontWithSize(textView.font!.pointSize*scaleRatio/zoom)
+//        scaledTextView.font = textView.font!.fontWithSize(textView.font!.pointSize*scaleRatio/zoom)
         
         let scaledTextImage = takeScreenshot(scaledTextView)
         UIGraphicsBeginImageContext(document.size)

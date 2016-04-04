@@ -100,6 +100,7 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
         NSLog("session streamDestroyed (\(stream.streamId))")
         if (stream.videoType == OTStreamVideoType.Screen){
             CallUtils.doScreenUnsubscribe()
+            self.sessionView.showDocumentImage()
         } else {
             self.sessionView.parentViewController?.navigationController?.navigationBarHidden = false
             if CallUtils.subscriber?.stream.streamId == stream.streamId {
@@ -125,6 +126,7 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
     func subscribeToStream(stream: OTStream){
         if (stream.videoType == OTStreamVideoType.Screen){
             CallUtils.doScreenSubscribe(stream)
+            self.sessionView.hideDocumentImage()
         // if it's not screen case it's camera
         } else if CallUtils.subscriber?.stream.streamId != stream.streamId {
             CallUtils.stream = stream

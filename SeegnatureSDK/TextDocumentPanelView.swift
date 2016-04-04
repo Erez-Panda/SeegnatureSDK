@@ -50,6 +50,10 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate, InputPanelsDelegate {
         
     }
     
+    func setFontSize(scaleRatio: CGFloat, zoom: CGFloat) {
+        self.textFieldView.font = self.textFieldView.font?.fontWithSize((16/scaleRatio)*zoom)
+    }
+    
     override var hidden: Bool {
         get {
             return super.hidden

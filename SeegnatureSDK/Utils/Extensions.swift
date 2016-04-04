@@ -188,6 +188,18 @@ extension UIImage {
     }
 }
 
+func showSpinner(text: String) {
+    dispatch_async(dispatch_get_main_queue()){
+        SwiftSpinner.show(text)
+    }
+}
+
+func hideSpinner() {
+    dispatch_async(dispatch_get_main_queue()){
+        SwiftSpinner.hide()
+    }
+}
+
 public func getTopViewController() -> UIViewController? {
     if var topController = UIApplication.sharedApplication().keyWindow?.rootViewController {
         while let presentedViewController = topController.presentedViewController {

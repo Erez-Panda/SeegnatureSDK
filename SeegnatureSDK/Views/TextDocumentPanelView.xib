@@ -79,43 +79,28 @@
                     </variation>
                 </button>
                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Type here" adjustsFontSizeToFit="NO" minimumFontSize="14" translatesAutoresizingMaskIntoConstraints="NO" id="M2w-Tg-Usm">
-                    <rect key="frame" x="59" y="82" width="371" height="36"/>
-                    <fontDescription key="fontDescription" type="system" pointSize="30"/>
+                    <rect key="frame" x="59" y="50.5" width="371" height="100"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
                     <textInputTraits key="textInputTraits"/>
                 </textField>
             </subviews>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
             <constraints>
                 <constraint firstAttribute="bottom" secondItem="hkD-re-f6Q" secondAttribute="bottom" constant="1" id="4b3-Hd-e53"/>
-                <constraint firstAttribute="bottom" secondItem="M2w-Tg-Usm" secondAttribute="bottom" constant="3" id="Apz-7I-DkT"/>
                 <constraint firstItem="HBl-aO-F0p" firstAttribute="trailing" secondItem="D3I-ih-Es2" secondAttribute="trailing" constant="10" id="C8u-PH-ORX"/>
                 <constraint firstItem="D3I-ih-Es2" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="GKa-Wi-xye"/>
-                <constraint firstItem="M2w-Tg-Usm" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="HMZ-Ve-h9v"/>
+                <constraint firstItem="M2w-Tg-Usm" firstAttribute="height" secondItem="iN0-l3-epB" secondAttribute="height" multiplier="1:2" id="GSa-wl-rA0"/>
                 <constraint firstItem="HBl-aO-F0p" firstAttribute="top" secondItem="D3I-ih-Es2" secondAttribute="top" constant="-10" id="KhG-P6-YhY"/>
                 <constraint firstAttribute="trailing" secondItem="D3I-ih-Es2" secondAttribute="trailing" id="PUS-1V-Xne"/>
                 <constraint firstItem="M2w-Tg-Usm" firstAttribute="leading" secondItem="hkD-re-f6Q" secondAttribute="trailing" constant="15" id="Ufo-vb-Ehg"/>
                 <constraint firstItem="D3I-ih-Es2" firstAttribute="leading" secondItem="M2w-Tg-Usm" secondAttribute="trailing" constant="5" id="ZnN-Gg-fH6"/>
                 <constraint firstAttribute="bottom" secondItem="D3I-ih-Es2" secondAttribute="bottom" id="baa-ZD-SEi"/>
-                <constraint firstItem="hkD-re-f6Q" firstAttribute="width" secondItem="D3I-ih-Es2" secondAttribute="width" multiplier="1:2" priority="500" id="dWo-pm-CCK"/>
                 <constraint firstItem="hkD-re-f6Q" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="h4l-v6-LEB"/>
-                <constraint firstItem="M2w-Tg-Usm" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="sJC-o2-sgR"/>
                 <constraint firstItem="M2w-Tg-Usm" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="t4h-b0-oX2"/>
                 <constraint firstItem="hkD-re-f6Q" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="xE0-hx-O0N"/>
-                <constraint firstItem="M2w-Tg-Usm" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="xEE-lr-TUb"/>
-                <constraint firstItem="M2w-Tg-Usm" firstAttribute="width" secondItem="D3I-ih-Es2" secondAttribute="width" multiplier="3:1" id="ynd-X5-0ww"/>
             </constraints>
             <nil key="simulatedStatusBarMetrics"/>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
-            <variation key="default">
-                <mask key="constraints">
-                    <exclude reference="dWo-pm-CCK"/>
-                    <exclude reference="Apz-7I-DkT"/>
-                    <exclude reference="HMZ-Ve-h9v"/>
-                    <exclude reference="sJC-o2-sgR"/>
-                    <exclude reference="xEE-lr-TUb"/>
-                    <exclude reference="ynd-X5-0ww"/>
-                </mask>
-            </variation>
             <connections>
                 <outlet property="addButton" destination="D3I-ih-Es2" id="GqD-WS-20q"/>
                 <outlet property="moveButton" destination="hkD-re-f6Q" id="ane-Fr-oYy"/>

@@ -31,7 +31,6 @@ struct CallUtils{
     static var sessionDelegate : OTSessionDelegate?
     static var subscriberDelegate : OTSubscriberKitDelegate?
     static var publisherDelegate : OTPublisherDelegate?
-//    static var delegate:CallDelegate?
     static var delegate:Session?
     static var remoteSideConnect = false
     static var callViewController: UIViewController?
@@ -199,9 +198,8 @@ struct CallUtils{
         session?.publish(publisher, error: &maybeError)
         
         if let error = maybeError {
-            ViewUtils.showAlert("OTError", message: error.localizedDescription)
+            printLog("OTError \(error.localizedDescription)")
         }
-        
         
         if videoEnabled() { //if (isFakeCall){
             publisher?.publishVideo = true
@@ -216,9 +214,8 @@ struct CallUtils{
         var maybeError : OTError?
         session?.publish(screenPublisher, error: &maybeError)
         
-        
         if let error = maybeError {
-            ViewUtils.showAlert("OTError", message: error.localizedDescription)
+            printLog("OTError \(error.localizedDescription)")
         }
         
     }
@@ -230,7 +227,7 @@ struct CallUtils{
             var maybeError : OTError?
             session.subscribe(screenSubscriber, error: &maybeError)
             if let error = maybeError {
-                ViewUtils.showAlert("OTError", message: error.localizedDescription)
+                printLog("OTError \(error.localizedDescription)")
             }
         }
     }
@@ -240,10 +237,9 @@ struct CallUtils{
         if let screenSubscriber = self.screenSubscriber {
             var maybeError : OTError?
             session?.unsubscribe(screenSubscriber, error: &maybeError)
-//            if let error = maybeError {
-//                ViewUtils.showAlert("OTError", message: error.localizedDescription)
-//            }
-            
+            if let error = maybeError {
+                printLog("OTError \(error.localizedDescription)")
+            }
             screenSubscriber.view.removeFromSuperview()
             self.screenSubscriber = nil
         }
@@ -261,7 +257,7 @@ struct CallUtils{
             var maybeError : OTError?
             session.subscribe(subscriber, error: &maybeError)
             if let error = maybeError {
-                ViewUtils.showAlert("OTError", message: error.localizedDescription)
+                printLog("OTError \(error.localizedDescription)")
             }
         }
     }
@@ -273,9 +269,9 @@ struct CallUtils{
         if let subscriber = self.subscriber {
             var maybeError : OTError?
             session?.unsubscribe(subscriber, error: &maybeError)
-//            if let error = maybeError {
-//                ViewUtils.showAlert("OTError", message: error.localizedDescription)
-//            }
+            if let error = maybeError {
+                printLog("OTError \(error.localizedDescription)")
+            }
             
             subscriber.view.removeFromSuperview()
             self.subscriber = nil
