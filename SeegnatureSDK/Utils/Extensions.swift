@@ -161,8 +161,17 @@ extension UIButton {
 }
 
 extension UITextField {
-    func setFontSize(size: CGFloat) {
-        self.font = UIFont(name: self.font!.fontName, size: size)
+    func heightForLabel(text:String, font:UIFont, width:CGFloat) -> CGFloat
+    {
+        let label:UILabel = UILabel(frame: CGRectMake(0, 0, width, CGFloat.max))
+        label.numberOfLines = 0
+        label.lineBreakMode = NSLineBreakMode.ByWordWrapping
+        label.font = font
+        label.text = text
+        
+        label.sizeToFit()
+        return label.frame.height
+        
     }
 }
 

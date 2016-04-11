@@ -10,7 +10,7 @@ import UIKit
 
 class TextDocumentPanelView: UIView, UITextFieldDelegate, InputPanelsDelegate {
     
-    var onAdd: ((textView: UITextField, origin: CGPoint) -> ())?
+    var onAdd: ((textView: UITextField, origin: CGPoint, textHeightOffset: CGFloat) -> ())?
     var onClose: ((sender: UIView) -> ())?
     
     var center_x_constraint: NSLayoutConstraint?
@@ -22,6 +22,8 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate, InputPanelsDelegate {
     @IBOutlet weak var textFieldView: UITextField!
     @IBOutlet weak var addButton: UIButton!
     @IBOutlet weak var moveButton: NIKFontAwesomeButton!
+    
+    var relativeFontSize: CGFloat = 16.0
     
     override func awakeFromNib() {
         self.layer.cornerRadius = 8
@@ -49,9 +51,11 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate, InputPanelsDelegate {
         self.isOpenedOnRemoteSide = true
         
     }
-    
-    func setFontSize(scaleRatio: CGFloat, zoom: CGFloat) {
-        self.textFieldView.font = self.textFieldView.font?.fontWithSize((16/scaleRatio)*zoom)
+
+    func setFontSize(scaleRatio: CGFloat, zoom: CGFloat, documentWidth: CGFloat) {
+        dispatch_async(dispatch_get_main_queue()){
+            self.textFieldView.font = self.textFieldView.font?.fontWithSize(((self.relativeFontSize * documentWidth)/scaleRatio)*zoom)
+        }
     }
     
     override var hidden: Bool {
@@ -74,6 +78,7 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate, InputPanelsDelegate {
                 }
                 if v {
                     self.isOpenedOnRemoteSide = false
+                    self.textFieldView.resignFirstResponder()
                 }
                 (self.superview as! SessionView).scrollView.scrollEnabled = v
             }
@@ -104,8 +109,9 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate, InputPanelsDelegate {
     
     @IBAction func sign(sender: AnyObject) {
         textFieldView.resignFirstResponder()
+        let heightForLabel = self.textFieldView.heightForLabel("TYPE HERE", font: self.textFieldView.font!, width: 10000.0)
         let offset = CGPointMake(frame.origin.x + textFieldView.frame.origin.x, frame.origin.y + textFieldView.frame.origin.y)
-        onAdd?(textView:textFieldView, origin: offset)
+        onAdd?(textView:textFieldView, origin: offset, textHeightOffset:(self.textFieldView.frame.size.height-heightForLabel)/2)
         self.hidden = true
         self.textFieldView.text = ""
     }

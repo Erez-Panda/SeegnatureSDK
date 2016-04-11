@@ -311,9 +311,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     
     func scrollViewDidEndZooming(scrollView: UIScrollView, withView view: UIView?, atScale scale: CGFloat) {
         sendTranslateAndScale()
-        let scaleRatio = getScaleRatio()
-        let zoom = scrollView.zoomScale
-        self.addTextView!.setFontSize(scaleRatio, zoom: zoom)
+        self.addTextView!.setFontSize(getScaleRatio(), zoom: scrollView.zoomScale, documentWidth: self.presentaionImage!.image!.size.width)
     }
 
     func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
@@ -1149,27 +1147,28 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         self.addTextView?.hidden = true
     }
     
-    func onTextAdded(textView: UITextField, origin: CGPoint){
-        //var userImage : UIImage?
+    func onTextAdded(textView: UITextField, origin: CGPoint, textHeightOffset: CGFloat){
+
         let screen =  UIScreen.mainScreen().bounds
         let zoom = scrollView!.zoomScale
-        //let offset = scrollView!.contentOffset
         let document = presentaionImage!.image!
+        
         //Image is aspect fit, scale factor will be the biggest change on image
         let scaleRatio = max(document.size.width/screen.width, document.size.height/screen.height)
         let X = (origin.x+scrollView!.contentOffset.x)/zoom
         let Y = (origin.y+scrollView!.contentOffset.y)/zoom
         
+        let Y_with_offset = (origin.y+scrollView!.contentOffset.y+textHeightOffset)/zoom
         
         //One of these have to be 0
         let heightDiff = (screen.height*scaleRatio) - document.size.height
         let widthDiff = (screen.width*scaleRatio) - document.size.width
         
-        sendAddedText(textView, origin:CGPointMake((X*scaleRatio)-widthDiff/2,(Y*scaleRatio)-heightDiff/2), imgSize:CGSizeMake( document.size.width, document.size.height), scaleRatio: scaleRatio, zoom:zoom)
+        sendAddedText(textView, origin:CGPointMake((X*scaleRatio)-widthDiff/2,(Y_with_offset*scaleRatio)-heightDiff/2), imgSize:CGSizeMake( document.size.width, document.size.height), scaleRatio: scaleRatio, zoom:zoom)
         
         let scaledTextView = UITextField(frame: CGRectMake(0,0,textView.frame.width*scaleRatio/zoom, textView.frame.height*scaleRatio/zoom))
         scaledTextView.text = textView.text
-//        scaledTextView.font = textView.font!.fontWithSize(textView.font!.pointSize*scaleRatio/zoom)
+        scaledTextView.font = textView.font!.fontWithSize(textView.font!.pointSize*scaleRatio/zoom)
         
         let scaledTextImage = takeScreenshot(scaledTextView)
         UIGraphicsBeginImageContext(document.size)
@@ -1194,7 +1193,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         ["width": textView.frame.width, "height": textView.frame.height,
             "left": origin.x/imgSize.width, "top": origin.y/imgSize.height,
             "image_width": (imgSize.width/scaleRatio)*zoom, "image_height": (imgSize.height/scaleRatio)*zoom,
-            "zoom": zoom, "text": textView.text!, "font_size": textView.font!.pointSize]
+            "zoom": zoom, "text": textView.text!, "font_size": Int(textView.font!.pointSize)]
         
         CallUtils.sendJsonMessage("add_text", data: newDictionary)
         
@@ -1202,7 +1201,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         newDictionary["page_number"] = self.currentPage
         newDictionary["document_id"] = self.currentDocument
         newDictionary["tracking"] = randomStringWithLength(16)
-        newDictionary["font_size"] = textView.font?.pointSize
+        newDictionary["font_size"] = Int(textView.font!.pointSize)
         newDictionary["type"] = "text"
         
         ServerAPI.sharedInstance.newModification(newDictionary, completion: { (result) -> Void in})
@@ -1500,10 +1499,11 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     
     func handleFontChange(string: String) {
         if let data = CallUtils.convertStringToDictionary(string) {
-            if let document = self.presentaionImage?.image {
-                let newFontSize = (data["newSize"] as! CGFloat) * document.size.width
-                self.addTextView?.textFieldView.setFontSize(newFontSize)
-            }
+            self.addTextView!.relativeFontSize = data["newSize"] as! CGFloat
+//            if let document = self.presentaionImage?.image {
+//                self.addTextView!.setFontSize(getScaleRatio(), zoom: scrollView.zoomScale, documentWidth: document.size.width)
+                handleZoom()
+//            }
         }
     }
 
@@ -1542,6 +1542,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             
             UIView.animateWithDuration(0.4, animations: { () -> Void in
                 self.scrollView?.setZoomScale(scaleRatio*scale, animated: false)
+                self.handleZoom()
             })
             
             
@@ -1571,6 +1572,15 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
                     self.addTextView?.last_open_box_info = string
                 }
             }
+            
+            handleZoom()
+            
+        }
+    }
+    
+    func handleZoom() {
+        if let _ = presentaionImage.image {
+            self.addTextView!.setFontSize(getScaleRatio(), zoom: scrollView.zoomScale, documentWidth: self.presentaionImage!.image!.size.width)
         }
     }
     
@@ -1632,6 +1642,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             
             UIView.animateWithDuration(0.4, animations: { () -> Void in
                 self.scrollView?.setZoomScale(scale, animated: false)
+                self.handleZoom()
             })
 
             
@@ -1656,17 +1667,14 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         }
         
     }
-//    func sendMetaData() {
-//        let newDictionary = ["platform": "iosSDK"]
-//        CallUtils.sendJsonMessage(SignalsType.Send_Meta_Data.rawValue, data: newDictionary)
-//    }
-    
+
     func loadResourcesWithIndex(string: String) {
 
         presentationWebView?.hidden = true
         presentationWebView?.loadHTMLString("", baseURL:nil)
         scrollView?.setZoomScale(1.0, animated: false)
-
+        handleZoom()
+        
         if let data = CallUtils.convertStringToDictionary(string) {
 
             currentDocument = data["document"] as! Int
@@ -1739,6 +1747,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         
         UIView.animateWithDuration(0.4, animations: { () -> Void in
             self.scrollView?.setZoomScale(CGFloat((params[0] as NSString).floatValue), animated: false)
+            self.handleZoom()
         })
         
         var coordsStr = params[1].characters.split{$0 == ","}.map { String($0) }
