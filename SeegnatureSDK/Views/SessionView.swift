@@ -117,8 +117,23 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         addClientGestures()
     }
     
+    
+    func appMovedToBackground() {
+        print("moved to background")
+//        CallUtils.doUnpublish()
+    }
+    
+    func appMovedToForeground() {
+        print("moved to foreground")
+        CallUtils.doPublish()
+    }
+    
     // called on first load
     func initDocument() {
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "appMovedToBackground", name: UIApplicationWillResignActiveNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "appMovedToForeground", name: UIApplicationDidBecomeActiveNotification, object: nil)
+        
         self.presentationWebView?.stopLoading()
         if self.currentSession?.isRep == true {
             initRepSession()
@@ -1019,8 +1034,13 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         CallUtils.incomingViewController = nil
         self.preLoadedImages.removeAll()
         self.removeFromSuperview()
+        removeObservers()
         Session.sharedInstance.disconnectingCall = false
         self.parentViewController?.navigationController?.navigationBarHidden = false
+    }
+    
+    func removeObservers() {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
     // MARK: - chat methods
