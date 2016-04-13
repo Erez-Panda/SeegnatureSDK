@@ -19,7 +19,8 @@ class LinearInterpView: UIView {
     // Only override drawRect: if you perform custom drawing.
     // An empty implementation adversely affects performance during animation.
     override func drawRect(rect: CGRect) {
-        UIColor.blackColor().setStroke()
+        ColorUtils.uicolorFromHex(0x000F7D).setStroke()
+        //UIColor.blackColor().setStroke()
         path?.stroke()
         // Drawing code
     }

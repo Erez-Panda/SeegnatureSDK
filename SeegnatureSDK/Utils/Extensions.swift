@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 //func printLog(text: AnyObject) {
-func printLog(logMessage: AnyObject, functionName: String = __FUNCTION__) {
+func printLog(logMessage: AnyObject, functionName: String = #function) {
     print("----------------------------------")
     print("\(functionName): \(logMessage)")
     print("----------------------------------")
@@ -228,7 +228,7 @@ public func randomStringWithLength(length: Int) -> String {
     
     let randomString : NSMutableString = NSMutableString(capacity: length)
     
-    for (var i=0; i < length; i++){
+    for (var i=0; i < length; i += 1){
         let length = UInt32 (letters.length)
         let rand = arc4random_uniform(length)
         randomString.appendFormat("%C", letters.characterAtIndex(Int(rand)))

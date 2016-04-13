@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9531" systemVersion="14F1021" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
         <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
     </dependencies>
     <objects>
@@ -12,7 +12,7 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Connecting..." lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yvV-JW-KL7">
-                    <rect key="frame" x="249" y="289" width="102.5" height="20.5"/>
+                    <rect key="frame" x="249" y="289" width="103" height="21"/>
                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <nil key="highlightedColor"/>
@@ -328,7 +328,7 @@
                     <rect key="frame" x="0.0" y="600" width="600" height="80"/>
                     <subviews>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hFQ-0a-XAX" userLabel="Sign" customClass="NIKFontAwesomeButton">
-                            <rect key="frame" x="15" y="-10" width="95" height="100.5"/>
+                            <rect key="frame" x="15" y="-10" width="95" height="100"/>
                             <state key="normal" image="chat_icon">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                             </state>
@@ -345,8 +345,8 @@
                                 <action selector="signButtonPressed:" destination="ve8-An-joz" eventType="touchUpInside" id="P4g-An-Sv5"/>
                             </connections>
                         </button>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="30M-hG-WT1" userLabel="Add Text" customClass="NIKFontAwesomeButton">
-                            <rect key="frame" x="110" y="-10" width="95" height="100.5"/>
+                        <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="30M-hG-WT1" userLabel="Add Text" customClass="NIKFontAwesomeButton">
+                            <rect key="frame" x="110" y="-10" width="95" height="101"/>
                             <state key="normal" image="chat_icon">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                             </state>
@@ -363,8 +363,8 @@
                                 <action selector="textButtonPressed:" destination="ve8-An-joz" eventType="touchUpInside" id="idl-XZ-Mi2"/>
                             </connections>
                         </button>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Bct-Ru-Yji">
-                            <rect key="frame" x="205" y="-10" width="95" height="100.5"/>
+                        <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Bct-Ru-Yji">
+                            <rect key="frame" x="205" y="-10" width="95" height="101"/>
                             <state key="normal" image="chat_icon">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                             </state>
@@ -372,8 +372,8 @@
                                 <action selector="chatButtonPressed:" destination="ve8-An-joz" eventType="touchUpInside" id="TDL-eJ-GW8"/>
                             </connections>
                         </button>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YEw-R4-eVF">
-                            <rect key="frame" x="300" y="-10" width="95" height="100.5"/>
+                        <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YEw-R4-eVF">
+                            <rect key="frame" x="300" y="-10" width="95" height="101"/>
                             <state key="normal" image="video_off_icon">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                             </state>
@@ -381,8 +381,8 @@
                                 <action selector="videoButtonPressed:" destination="ve8-An-joz" eventType="touchUpInside" id="bGb-67-ZMx"/>
                             </connections>
                         </button>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CAh-vW-Hv7">
-                            <rect key="frame" x="395" y="-10" width="95" height="100.5"/>
+                        <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CAh-vW-Hv7">
+                            <rect key="frame" x="395" y="-10" width="95" height="101"/>
                             <state key="normal" image="audio_on_icon">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                             </state>
@@ -391,7 +391,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FWp-K1-HCt">
-                            <rect key="frame" x="490" y="-10" width="95" height="100.5"/>
+                            <rect key="frame" x="490" y="-10" width="95" height="100"/>
                             <state key="normal" image="decline_incoming">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                             </state>
@@ -443,7 +443,7 @@
                     </constraints>
                 </view>
                 <button hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PW0-jX-piU" userLabel="pointer" customClass="NIKFontAwesomeButton">
-                    <rect key="frame" x="277" y="285" width="46" height="30"/>
+                    <rect key="frame" x="0.0" y="0.0" width="26" height="30"/>
                     <state key="normal">
                         <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                     </state>
