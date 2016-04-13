@@ -23,7 +23,7 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate, InputPanelsDelegate {
     @IBOutlet weak var addButton: UIButton!
     @IBOutlet weak var moveButton: NIKFontAwesomeButton!
     
-    var relativeFontSize: CGFloat = 16.0
+    var relativeFontSize: CGFloat?
     
     override func awakeFromNib() {
         self.layer.cornerRadius = 8
@@ -31,7 +31,7 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate, InputPanelsDelegate {
         self.layer.borderWidth = 1
         self.clipsToBounds = true
         textFieldView.delegate = self
-        textFieldView.addTarget(self, action: "textDidChange", forControlEvents: UIControlEvents.EditingChanged)
+        textFieldView.addTarget(self, action: #selector(TextDocumentPanelView.textDidChange), forControlEvents: UIControlEvents.EditingChanged)
         self.translatesAutoresizingMaskIntoConstraints = false
     }
     
@@ -54,7 +54,11 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate, InputPanelsDelegate {
 
     func setFontSize(scaleRatio: CGFloat, zoom: CGFloat, documentWidth: CGFloat) {
         dispatch_async(dispatch_get_main_queue()){
-            self.textFieldView.font = self.textFieldView.font?.fontWithSize(((self.relativeFontSize * documentWidth)/scaleRatio)*zoom)
+            var font: CGFloat = 16.0*zoom
+            if let relativeSize = self.relativeFontSize{
+                font = ((relativeSize * documentWidth)/scaleRatio)*zoom
+            }
+            self.textFieldView.font = self.textFieldView.font?.fontWithSize(font)
         }
     }
     

@@ -311,6 +311,12 @@ class ServerAPI {
         })
     }
     
+    func deletePartialDocument(data: Dictionary<String, AnyObject>, completion: (result: NSDictionary) -> Void) -> Void{
+        self.http("/sign-documents/partial/delete/", message: data, method: .POST, completion: {result -> Void in
+            completion(result: self.getDictionaryResult(result))
+        })
+    }
+    
     func newSignedDocument(data: Dictionary<String, AnyObject>, completion: (result: NSDictionary) -> Void) -> Void{
         self.http("/sign-documents/", message: data, method: .POST, completion: {result -> Void in
             completion(result: self.getDictionaryResult(result))

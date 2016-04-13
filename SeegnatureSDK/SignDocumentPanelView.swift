@@ -68,6 +68,9 @@ class SignDocumentPanelView: UIView, InputPanelsDelegate {
                 } else {
                     self.userInteractionEnabled = true
                 }
+                if v {
+                    self.isOpenedOnRemoteSide = false
+                }
                 (self.superview as! SessionView).scrollView.scrollEnabled = v
             }
         }
