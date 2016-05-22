@@ -121,12 +121,12 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     
     func appMovedToBackground() {
         print("moved to background")
-//        CallUtils.doUnpublish()
+        CallUtils.publisher?.publishVideo = false
     }
     
     func appMovedToForeground() {
         print("moved to foreground")
-        CallUtils.doPublish()
+        CallUtils.publisher?.publishVideo = true
     }
     
     // called on first load
@@ -568,6 +568,21 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     
     // MARK: video methods
     
+    func showVideo(view: UIView){
+        self.addSubview(view)
+        view.addConstraintsToSuperview(self, top: 0.0, left: nil, bottom: nil, right: 0.0)
+        view.addSizeConstaints(videoWidth, height: videoHeight)
+        
+        if let pubView = CallUtils.publisher?.view {
+            
+            pubView.removeFromSuperview()
+            view.addSubview(pubView)
+            pubView.addConstraintsToSuperview(view, top: nil, left: nil, bottom: 0.0, right: 0.0)
+            publisherSizeConst = pubView.addSizeConstaints(videoWidth, height: videoHeight)
+            NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(3), target: self, selector: #selector(SessionView.shrinkPublisher), userInfo: AnyObject?(), repeats: false)
+        }
+    }
+    
     func subscriberDidConnectToStream() {
         
         if CallUtils.screenSubscriber?.stream.videoType == OTStreamVideoType.Screen {
@@ -579,17 +594,32 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
                 view.setConstraintesToCenterSuperView(self)
             }
         } else if let view = CallUtils.subscriber?.view {
-            self.addSubview(view)
-            view.addConstraintsToSuperview(self, top: 0.0, left: nil, bottom: nil, right: 0.0)
-            view.addSizeConstaints(videoWidth, height: videoHeight)
-            if let pubView = CallUtils.publisher?.view {
+            if self.currentSession?.isRep == true{
+                CallUtils.doPublish()
+                showVideo(view)
+            } else {
+                let caller = CallUtils.currentCall?["caller"] as? NSDictionary
+                let firstName = caller!["user"]!["first_name"] as! String
                 
-                pubView.removeFromSuperview()
-                view.addSubview(pubView)
-                pubView.addConstraintsToSuperview(view, top: nil, left: nil, bottom: 0.0, right: 0.0)
-                publisherSizeConst = pubView.addSizeConstaints(videoWidth, height: videoHeight)
-                NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(3), target: self, selector: #selector(SessionView.shrinkPublisher), userInfo: AnyObject?(), repeats: false)
+                let alertController = UIAlertController(title: "Incoming Video", message: "\(firstName) is calling you", preferredStyle: .Alert)
+                
+                let yesAction = UIAlertAction(title: "ANSWER", style: .Default) { (action:UIAlertAction!) in
+                    print("Yes button pressed")
+                    CallUtils.doPublish()
+                    self.showVideo(view)
+                    
+                }
+                
+                let noAction = UIAlertAction(title: "DECLINE", style: .Default) { (action:UIAlertAction!) in
+                    print("No button pressed");
+                }
+                
+                alertController.addAction(yesAction)
+                alertController.addAction(noAction)
+                self.parentViewController!.presentViewController(alertController, animated: true, completion: nil)
+                
             }
+            
         }
     }
     
@@ -942,7 +972,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     
     func imagePickerController(picker: UIImagePickerController!, didFinishPickingImage image: UIImage!, editingInfo: NSDictionary!){
         
-        CallUtils.doPublish()
+        CallUtils.publisher?.publishVideo = true
         
         ViewUtils.getTopViewController()!.dismissViewControllerAnimated(true, completion: { () -> Void in
             if let id = CallUtils.currentCall?["id"] as? NSNumber{
@@ -1000,7 +1030,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         if let pVideo = CallUtils.publisher?.publishVideo{
             CallUtils.publisher?.publishVideo = !pVideo
             if (!pVideo){
-                if let image = ViewUtils.loadUIImageNamed("video_off_icon") {
+                if let image = ViewUtils.loadUIImageNamed("video_on_icon") {
                     self.toggleVideoButton.setImageForAllStates(image)
                 }
                 if let view = CallUtils.publisher?.view {
@@ -1016,7 +1046,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
                     }
                 }
             } else {
-                if let image = ViewUtils.loadUIImageNamed("video_on_icon") {
+                if let image = ViewUtils.loadUIImageNamed("video_off_icon") {
                     toggleVideoButton.setImageForAllStates(image)
                 }
 
@@ -1182,7 +1212,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         self.addTextView?.hidden = true
     }
     
-    func onTextAdded(textView: UITextField, origin: CGPoint, textHeightOffset: CGFloat){
+    func onTextAdded(textView: UITextField, origin: CGPoint, textHeightOffset: CGFloat, textHeight: CGFloat){
 
         let screen =  UIScreen.mainScreen().bounds
         let zoom = scrollView!.zoomScale
@@ -1199,7 +1229,12 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         let heightDiff = (screen.height*scaleRatio) - document.size.height
         let widthDiff = (screen.width*scaleRatio) - document.size.width
         
-        sendAddedText(textView, origin:CGPointMake((X*scaleRatio)-widthDiff/2,(Y_with_offset*scaleRatio)-heightDiff/2), imgSize:CGSizeMake( document.size.width, document.size.height), scaleRatio: scaleRatio, zoom:zoom)
+        sendAddedText(textView,
+                      origin:CGPointMake((X*scaleRatio)-widthDiff/2,(Y_with_offset*scaleRatio)-heightDiff/2),
+                      imgSize:CGSizeMake( document.size.width, document.size.height),
+                      scaleRatio: scaleRatio,
+                      zoom:zoom,
+                      textHeight: textHeight)
         
         let scaledTextView = UITextField(frame: CGRectMake(0,0,textView.frame.width*scaleRatio/zoom, textView.frame.height*scaleRatio/zoom))
         scaledTextView.text = textView.text
@@ -1221,7 +1256,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         
     }
     
-    func sendAddedText(textView: UITextField, origin: CGPoint, imgSize: CGSize, scaleRatio: CGFloat, zoom: CGFloat){
+    func sendAddedText(textView: UITextField, origin: CGPoint, imgSize: CGSize, scaleRatio: CGFloat, zoom: CGFloat, textHeight: CGFloat){
         
         var newDictionary: Dictionary<String, AnyObject>  =
         
@@ -1238,6 +1273,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         newDictionary["tracking"] = randomStringWithLength(16)
         newDictionary["font_size"] = Int(textView.font!.pointSize)
         newDictionary["type"] = "text"
+        newDictionary["height"] = textHeight
         
         ServerAPI.sharedInstance.newModification(newDictionary, completion: { (result) -> Void in})
 
@@ -1503,9 +1539,10 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         }
     }
     
-    func sendLockResponse(var data: Dictionary<String, AnyObject>, val: Bool) {
-        data["lock"] = val
-        CallUtils.sendJsonMessage(SignalsType.Confirm_Lock.rawValue, data: data)
+    func sendLockResponse(data: Dictionary<String, AnyObject>, val: Bool) {
+        var d = data
+        d["lock"] = val
+        CallUtils.sendJsonMessage(SignalsType.Confirm_Lock.rawValue, data: d)
     }
     
     func handleLockRespose(string: String) {
@@ -1543,70 +1580,72 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     func handleOpenBox(string: String) {
 
         if let box = CallUtils.convertStringToDictionary(string) {
-            
-            let document = self.presentaionImage!.image!
-            let top = box["top"] as! CGFloat*document.size.height
-            let left = (box["left"] as! CGFloat)*document.size.width
-            let width = box["width"] as! CGFloat*document.size.width
-            let height = box["height"] as! CGFloat*document.size.height
-            let showSignPanel = box["showSignPanel"] as! Bool
-            let showTextPanel = box["showTextPanel"] as! Bool
-            
-            if ((showSignPanel == false) && (showTextPanel == false)) {
-                return
-            }
-            
-            self.scrollView?.scrollEnabled = false
-            
-            var bounds = UIScreen.mainScreen().bounds.size
+            if scrollView != nil {
+                if let document = self.presentaionImage?.image {
+                    let top = box["top"] as! CGFloat*document.size.height
+                    let left = (box["left"] as! CGFloat)*document.size.width
+                    let width = box["width"] as! CGFloat*document.size.width
+                    let height = box["height"] as! CGFloat*document.size.height
+                    let showSignPanel = box["showSignPanel"] as? Bool
+                    let showTextPanel = box["showTextPanel"] as? Bool
+                    
+                    if ((showSignPanel != true) && (showTextPanel != true)) {
+                        return
+                    }
+                    
+                    self.scrollView?.scrollEnabled = false
+                    
+                    var bounds = UIScreen.mainScreen().bounds.size
 
-            if(UIDeviceOrientationIsLandscape(UIDevice.currentDevice().orientation)){
-                bounds = CGSizeMake(max(bounds.height, bounds.width), min(bounds.height, bounds.width))
-            }
-            if(UIDeviceOrientationIsPortrait(UIDevice.currentDevice().orientation)){
-                bounds = CGSizeMake(min(bounds.height, bounds.width), max(bounds.height, bounds.width))
-            }
+                    if(UIDeviceOrientationIsLandscape(UIDevice.currentDevice().orientation)){
+                        bounds = CGSizeMake(max(bounds.height, bounds.width), min(bounds.height, bounds.width))
+                    }
+                    if(UIDeviceOrientationIsPortrait(UIDevice.currentDevice().orientation)){
+                        bounds = CGSizeMake(min(bounds.height, bounds.width), max(bounds.height, bounds.width))
+                    }
 
-            let w: CGFloat = signPanelWidth
-            let scale = w/width
-            
-            // Image is aspect fit, scale factor will be the biggest change on image
-            let scaleRatio = max(document.size.width/bounds.width, document.size.height/bounds.height)
-            
-            UIView.animateWithDuration(0.4, animations: { () -> Void in
-                self.scrollView?.setZoomScale(scaleRatio*scale, animated: false)
-                self.handleZoom()
-            })
-            
-            
-            // One of these has to be 0
-            let heightDiff = (bounds.height*scaleRatio*scale - document.size.height*scale)/2
-            let widthDiff = (bounds.width*scaleRatio*scale - document.size.width*scale)/2
+                    let w: CGFloat = signPanelWidth
+                    let scale = w/width
+                    
+                    // Image is aspect fit, scale factor will be the biggest change on image
+                    let scaleRatio = max(document.size.width/bounds.width, document.size.height/bounds.height)
+                    
+                    UIView.animateWithDuration(0.4, animations: { () -> Void in
+                        self.scrollView?.setZoomScale(scaleRatio*scale, animated: false)
+                        self.handleZoom()
+                    })
+                    
+                    
+                    // One of these has to be 0
+                    let heightDiff = (bounds.height*scaleRatio*scale - document.size.height*scale)/2
+                    let widthDiff = (bounds.width*scaleRatio*scale - document.size.width*scale)/2
 
-            let h = height*scale
-            let X = left*scale+widthDiff-((bounds.width-w)/2)
-            let Y = top*scale+heightDiff-((bounds.height-h)/2)
-            
-            signPanelHeight = height*scale
-            self.scrollView?.contentOffset = CGPointMake(X - signPanelWidth/2 , Y - signPanelHeight/2)
+                    let h = height*scale
+                    let X = left*scale+widthDiff-((bounds.width-w)/2)
+                    let Y = top*scale+heightDiff-((bounds.height-h)/2)
+                    
+                    signPanelHeight = height*scale
+                    self.scrollView?.contentOffset = CGPointMake(X - signPanelWidth/2 , Y - signPanelHeight/2)
 
-            if showSignPanel == true {
-                self.signView?.hidden = false
-                self.addTextView?.hidden = true
-                self.signView?.center_x_constraint?.constant = 0
-                self.signView?.center_y_constraint?.constant = 0
-                self.signView?.last_open_box_info = string
-            } else {
-                if showTextPanel == true {
-                    self.addTextView?.hidden = false
-                    self.signView?.hidden = true
-                    self.addTextView?.center_x_constraint?.constant = 0
-                    self.addTextView?.center_y_constraint?.constant = 0
-                    self.addTextView?.last_open_box_info = string
+                    if showSignPanel == true {
+                        self.signView?.hidden = false
+                        self.addTextView?.hidden = true
+                        self.signView?.center_x_constraint?.constant = 0
+                        self.signView?.center_y_constraint?.constant = 0
+                        self.signView?.last_open_box_info = string
+                    } else {
+                        if showTextPanel == true {
+                            self.addTextView?.hidden = false
+                            self.signView?.hidden = true
+                            self.addTextView?.center_x_constraint?.constant = 0
+                            self.addTextView?.center_y_constraint?.constant = 0
+                            self.addTextView?.last_open_box_info = string
+                        }
+                    }
+                    
+                    handleZoom()
                 }
             }
-            
-            handleZoom()
             
         }
     }
@@ -1866,7 +1905,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     }
     
     func handleAskForPhoto() {
-        CallUtils.doUnpublish()
+        CallUtils.publisher?.publishVideo = false
         
         imagePicker.sourceType = .Camera
         ViewUtils.getTopViewController()!.presentViewController(imagePicker, animated: true, completion: nil)

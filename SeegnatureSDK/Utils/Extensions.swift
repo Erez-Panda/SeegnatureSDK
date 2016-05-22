@@ -116,7 +116,7 @@ extension String {
     {
         let start = self.characters.startIndex.advancedBy(startIndex)
         let end = self.characters.startIndex.advancedBy(startIndex+length)
-        return self.substringWithRange(Range<String.Index>(start: start, end: end))
+        return self.substringWithRange(Range<String.Index>(start..<end))
     }
     
     func lastIndexOf(s: String) -> Int? {
@@ -228,7 +228,7 @@ public func randomStringWithLength(length: Int) -> String {
     
     let randomString : NSMutableString = NSMutableString(capacity: length)
     
-    for (var i=0; i < length; i += 1){
+    for _ in 0 ..< length{
         let length = UInt32 (letters.length)
         let rand = arc4random_uniform(length)
         randomString.appendFormat("%C", letters.characterAtIndex(Int(rand)))

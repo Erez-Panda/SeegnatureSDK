@@ -106,6 +106,7 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
             if CallUtils.subscriber?.stream.streamId == stream.streamId {
                 //self.activeChatView.text = (self.activeChatView.text + "Remote side stopped video stream\n")
                 CallUtils.doUnsubscribe()
+                CallUtils.doUnpublish()
             }
         }
     }

@@ -10,6 +10,7 @@ import Foundation
 
 var SERVER_URL = "https://www.seegnature.com"
 //var SERVER_URL = "http://www.livemed-test.com"
+//var SERVER_URL = "http://127.0.0.1:8000"
 
 // MARK:
 

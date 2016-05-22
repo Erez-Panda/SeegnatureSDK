@@ -10,7 +10,7 @@ import UIKit
 
 class TextDocumentPanelView: UIView, UITextFieldDelegate, InputPanelsDelegate {
     
-    var onAdd: ((textView: UITextField, origin: CGPoint, textHeightOffset: CGFloat) -> ())?
+    var onAdd: ((textView: UITextField, origin: CGPoint, textHeightOffset: CGFloat, textHeight: CGFloat) -> ())?
     var onClose: ((sender: UIView) -> ())?
     
     var center_x_constraint: NSLayoutConstraint?
@@ -115,7 +115,7 @@ class TextDocumentPanelView: UIView, UITextFieldDelegate, InputPanelsDelegate {
         textFieldView.resignFirstResponder()
         let heightForLabel = self.textFieldView.heightForLabel("TYPE HERE", font: self.textFieldView.font!, width: 10000.0)
         let offset = CGPointMake(frame.origin.x + textFieldView.frame.origin.x, frame.origin.y + textFieldView.frame.origin.y)
-        onAdd?(textView:textFieldView, origin: offset, textHeightOffset:(self.textFieldView.frame.size.height-heightForLabel)/2)
+        onAdd?(textView:textFieldView, origin: offset, textHeightOffset:(self.textFieldView.frame.size.height-heightForLabel)/2, textHeight: heightForLabel)
         self.hidden = true
         self.textFieldView.text = ""
     }

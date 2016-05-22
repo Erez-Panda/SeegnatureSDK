@@ -193,16 +193,12 @@ struct CallUtils{
             return
         }
         publisher = OTPublisher(delegate: self.publisherDelegate)
-        publisher?.publishVideo = false
+        publisher?.publishVideo = true
         var maybeError : OTError?
         session?.publish(publisher, error: &maybeError)
         
         if let error = maybeError {
             printLog("OTError \(error.localizedDescription)")
-        }
-        
-        if videoEnabled() { //if (isFakeCall){
-            publisher?.publishVideo = true
         }
         
     }
