@@ -10,7 +10,7 @@ import Foundation
 
 var SERVER_URL = "https://www.seegnature.com"
 //var SERVER_URL = "http://www.livemed-test.com"
-//var SERVER_URL = "http://127.0.0.1:8000"
+//var SERVER_URL = "http://172.15.131.123:8000"
 
 // MARK:
 
@@ -160,17 +160,6 @@ class ServerAPI {
         })
     }
     
-    func newCallRequest (callData: Dictionary<String, AnyObject>, completion: (result: NSDictionary) -> Void) -> Void{
-        self.http("/calls/requests/",method: .POST, message: callData, completion: {result -> Void in
-            completion(result: self.getDictionaryResult(result))
-        })
-    }
-    
-    func getCurrentCall (completion: (result: NSDictionary) -> Void) -> Void{
-        self.http("/calls/user/current/", completion: {result -> Void in
-            completion(result: self.getDictionaryResult(result))
-        })
-    }
     
     func getCallById (id: String, completion: (result: NSDictionary) -> Void) -> Void{
         self.http("/calls/\(id)/", completion: {result -> Void in
@@ -191,23 +180,12 @@ class ServerAPI {
     }
     
     
-    func rescheduleCall (rescheduleData: Dictionary<String, AnyObject>, completion: (result: NSDictionary) -> Void) -> Void{
-        self.http("/calls/requests/reschedule/", message: rescheduleData, method: .POST, completion: {result -> Void in
-            completion(result: self.getDictionaryResult(result))
-        })
-    }
-    
     func getUserCalls (completion: (result: NSArray) -> Void) -> Void {
         self.http("/calls/user/", completion: { (result) -> Void in
             completion(result: self.getArrayResult(result))
         })
     }
     
-    func getUserLetters (completion: (result: NSArray) -> Void) -> Void {
-        self.http("/products/user/medical_letter_requests/", completion: { (result) -> Void in
-            completion(result: self.getArrayResult(result))
-        })
-    }
     
     func sendDeviceToken (token: String){
         let data = ["registration_id": token] as Dictionary<String, String>
@@ -222,39 +200,9 @@ class ServerAPI {
         })
     }
     
-    func getProductArticles(product:NSNumber, completion: (result: NSArray) -> Void) -> Void{
-        self.http("/products/articles/?product=\(product)", completion: {result -> Void in
-            completion(result: self.getArrayResult(result))
-        })
-    }
-    
-    func getProductPromotionalMaterials(product:NSNumber, completion: (result: NSArray) -> Void) -> Void{
-        self.http("/products/promotional_materials/?product=\(product)", completion: {result -> Void in
-            completion(result: self.getArrayResult(result))
-        })
-    }
-    
     func getFileUrl(file: NSNumber, completion: (result: NSString) -> Void) -> Void{
         self.http("/resources/files/?file=\(file)", isJSONRequest: false, completion: {result -> Void in
             completion(result: self.getStringResult(result))
-        })
-    }
-    
-    func newMedicalLetterRequest(request: Dictionary<String, AnyObject>, completion: (result: Bool) -> Void) -> Void{
-        self.http("/products/medical_letter_requests/", method: .POST, message: request, completion: {result -> Void in
-            completion(result: true)
-        })
-    }
-    
-    func newSampleRequest(request: Dictionary<String, AnyObject>, completion: (result: Bool) -> Void) -> Void{
-        self.http("/products/sample_requests/", message: request ,method: .POST, completion: {result -> Void in
-            completion(result: true)
-        })
-    }
-    
-    func getProductSampleTypes(product:NSNumber, completion: (result: NSArray) -> Void) -> Void{
-        self.http("/products/sample_types/?product=\(product)", completion: {result -> Void in
-            completion(result: self.getArrayResult(result))
         })
     }
     
@@ -317,18 +265,7 @@ class ServerAPI {
             completion(result: self.getDictionaryResult(result))
         })
     }
-    
-    func newSignedDocument(data: Dictionary<String, AnyObject>, completion: (result: NSDictionary) -> Void) -> Void{
-        self.http("/sign-documents/", message: data, method: .POST, completion: {result -> Void in
-            completion(result: self.getDictionaryResult(result))
-        })
-    }
-    
-    func newPartialDocument(data: Dictionary<String, AnyObject>, completion: (result: NSDictionary) -> Void) -> Void{
-        self.http("/sign-documents/partial/", message: data, method: .POST, completion: {result -> Void in
-            completion(result: self.getDictionaryResult(result))
-        })
-    }
+
     
     func lockDocument(data: Dictionary<String, AnyObject>, completion: (result: NSDictionary) -> Void) -> Void{
         self.http("/sign-documents/lock/", message: data, method: .POST, completion: {result -> Void in

@@ -106,23 +106,6 @@ struct CallUtils{
         }
     }
 
-    
-    static func connectToCurrentCallSession(delegateViewController: UIViewController, completion: (result: NSDictionary) -> Void) -> Void{
-        callViewController = delegateViewController
-        ServerAPI.sharedInstance.getCurrentCall( {result -> Void in
-            self.currentCall = result
-            self.getCallerImage()
-            // Step 1: As the view is loaded initialize a new instance of OTSession
-            if let call = self.currentCall?["session"] as? String{
-                CallUtils.initCall(call, token: self.currentCall?["token"] as! String)
-                completion(result: self.currentCall!)
-                
-            } else{
-                completion(result: [:])
-            }
-        })
-    }
-
     static func initCall(sessionId: String, token: String){
         self.token = token
         self.sessionDelegate = self.delegate as? OTSessionDelegate
