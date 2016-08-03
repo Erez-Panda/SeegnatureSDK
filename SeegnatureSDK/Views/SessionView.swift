@@ -120,12 +120,12 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     
     
     func appMovedToBackground() {
-        print("moved to background")
+        print("moved to background", terminator: "")
         CallUtils.publisher?.publishVideo = false
     }
     
     func appMovedToForeground() {
-        print("moved to foreground")
+        print("moved to foreground", terminator: "")
         CallUtils.publisher?.publishVideo = true
     }
     
@@ -583,6 +583,30 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         }
     }
     
+    func openPublishDialog(view: UIView?){
+        let caller = CallUtils.currentCall?["caller"] as? NSDictionary
+        let firstName = caller!["user"]!["first_name"] as! String
+        
+        let alertController = UIAlertController(title: "Incoming Video", message: "\(firstName) is calling you", preferredStyle: .Alert)
+        
+        let yesAction = UIAlertAction(title: "ANSWER", style: .Default) { (action:UIAlertAction) in
+            print("Yes button pressed", terminator: "")
+            CallUtils.doPublish()
+            if let streamView = view{
+                self.showVideo(streamView)
+            }
+            
+        }
+        
+        let noAction = UIAlertAction(title: "DECLINE", style: .Default) { (action:UIAlertAction) in
+            print("No button pressed", terminator: "");
+        }
+        
+        alertController.addAction(yesAction)
+        alertController.addAction(noAction)
+        self.parentViewController!.presentViewController(alertController, animated: true, completion: nil)
+    }
+    
     func subscriberDidConnectToStream() {
         
         if CallUtils.screenSubscriber?.stream.videoType == OTStreamVideoType.Screen {
@@ -598,26 +622,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
                 CallUtils.doPublish()
                 showVideo(view)
             } else {
-                let caller = CallUtils.currentCall?["caller"] as? NSDictionary
-                let firstName = caller!["user"]!["first_name"] as! String
-                
-                let alertController = UIAlertController(title: "Incoming Video", message: "\(firstName) is calling you", preferredStyle: .Alert)
-                
-                let yesAction = UIAlertAction(title: "ANSWER", style: .Default) { (action:UIAlertAction!) in
-                    print("Yes button pressed")
-                    CallUtils.doPublish()
-                    self.showVideo(view)
-                    
-                }
-                
-                let noAction = UIAlertAction(title: "DECLINE", style: .Default) { (action:UIAlertAction!) in
-                    print("No button pressed");
-                }
-                
-                alertController.addAction(yesAction)
-                alertController.addAction(noAction)
-                self.parentViewController!.presentViewController(alertController, animated: true, completion: nil)
-                
+                openPublishDialog(view)
             }
             
         }
@@ -936,7 +941,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     
     override func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?) {
         super.touchesCancelled(touches, withEvent: event)
-        print("CANCEL")
+        print("CANCEL", terminator: "")
     }
     
     override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -1300,6 +1305,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         case Close_Rep_Box = "close_box"
         case Clean_Page = "clean_page"
         case Confirm_Lock = "confirm_lock"
+        case Ask_For_Video = "ask_for_video"
     }
     
     // MARK: outgoing messages
@@ -1467,6 +1473,9 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         case SignalsType.Confirm_Lock.rawValue:
             handleLockRespose(string)
             break
+        case SignalsType.Ask_For_Video.rawValue:
+            handleAskForVideo(string)
+            break
         default:
             printLog("Couldn't find an event")
         }
@@ -1522,13 +1531,13 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             
             let alertController = UIAlertController(title: "Lock request", message: "\(firstName) has requested to lock the document! Do you agree?", preferredStyle: .Alert)
             
-            let yesAction = UIAlertAction(title: "YES", style: .Default) { (action:UIAlertAction!) in
-                print("Yes button pressed")
+            let yesAction = UIAlertAction(title: "YES", style: .Default) { (action:UIAlertAction) in
+                print("Yes button pressed", terminator: "")
                 self.sendLockResponse(data, val: true)
             }
             
-            let noAction = UIAlertAction(title: "NO", style: .Default) { (action:UIAlertAction!) in
-                print("No button pressed");
+            let noAction = UIAlertAction(title: "NO", style: .Default) { (action:UIAlertAction) in
+                print("No button pressed", terminator: "");
                 self.sendLockResponse(data, val: false)
             }
             
@@ -1568,6 +1577,10 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
                 }
             }
         }
+    }
+    
+    func handleAskForVideo(string:String){
+        openPublishDialog(nil)
     }
     
     func handleFontChange(string: String) {
