@@ -63,7 +63,7 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
     }
     
     func loadView(superView: UIView) {
-        let documentView = NSBundle(forClass: SeegnatureActions.self).loadNibNamed("SessionView", owner: self, options: nil)[0] as! SessionView
+        let documentView = NSBundle(forClass: SeegnatureActions.self).loadNibNamed("SessionView", owner: self, options: nil)![0] as! SessionView
         documentView.resources = self.resources
         documentView.currentSession = self
         documentView.attachToView(superView)

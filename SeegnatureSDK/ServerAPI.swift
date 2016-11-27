@@ -9,17 +9,18 @@
 import Foundation
 
 var SERVER_URL = "https://www.seegnature.com"
-//var SERVER_URL = "http://www.livemed-test.com"
+//var SERVER_URL = "https://preview.seegnature.com"
 //var SERVER_URL = "http://172.15.131.123:8000"
 
 // MARK:
 
-class ServerAPI {
+public class ServerAPI {
     
-    static let sharedInstance = ServerAPI()
+    public static let sharedInstance = ServerAPI()
 
     let manager = AFHTTPSessionManager()
     var token = ""
+    var bearer = ""
     
     // MARK: requst type enum
     
@@ -29,6 +30,10 @@ class ServerAPI {
         case DELETE
         case PATCH
         case PUT
+    }
+    
+    public func setBearer(bearer: String){
+        self.bearer = bearer
     }
     
     func getArrayResult(result: AnyObject) ->NSArray {
@@ -310,7 +315,7 @@ class ServerAPI {
             completion(result: self.getDictionaryResult(result))
         })
     }
-    func getResourceDisplay(resourceId: NSNumber, completion: (result: NSArray) -> Void) -> Void{
+    func getResourceDisplay(resourceId: String, completion: (result: NSArray) -> Void) -> Void{
         self.http("/resources/display/?resource=\(resourceId)", completion: {result -> Void in
             completion(result: self.getArrayResult(result))
         })
@@ -342,6 +347,9 @@ class ServerAPI {
         if (self.token != ""){
             self.manager.requestSerializer.setValue("Token", forHTTPHeaderField: "WWW-Authenticate")
             self.manager.requestSerializer.setValue("Token \(self.token)", forHTTPHeaderField: "Authorization")
+        }
+        if (self.bearer != ""){
+            self.manager.requestSerializer.setValue("Bearer \(self.bearer)", forHTTPHeaderField: "Authorization")
         }
         return manager
     }
@@ -405,7 +413,7 @@ class ServerAPI {
         return "Boundary-\(NSUUID().UUIDString)"
     }
     
-    func uploadFile(data: NSData, filename:String, mimetype: String = "image/jpeg", completion: (result: AnyObject) -> Void) -> Void{
+    func uploadFile(data: NSData, filename:String, mimetype: String = "image/jpeg", call: String = "", completion: (result: AnyObject) -> Void) -> Void{
         if (!NetworkUtils.checkConnection()){
             completion(result: false)
             return
@@ -416,8 +424,14 @@ class ServerAPI {
         request.HTTPMethod = "PUT"
         let boundary = generateBoundaryString()
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        if (self.bearer != ""){
+            request.addValue("Bearer \(self.bearer)", forHTTPHeaderField: "Authorization")
+        }
         let body = NSMutableData()
         let mimetype = mimetype
+        body.appendString("--\(boundary)\r\n")
+        body.appendString("Content-Disposition: form-data; name=\"call\"\r\n\r\n")
+        body.appendString("\(call)\r\n")
         body.appendString("--\(boundary)\r\n")
         body.appendString("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")
         body.appendString("Content-Type: \(mimetype)\r\n\r\n")

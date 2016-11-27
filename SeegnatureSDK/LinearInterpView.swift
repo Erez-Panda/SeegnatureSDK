@@ -52,7 +52,7 @@ class LinearInterpView: UIView {
             super.touchesEnded(touches, withEvent: event)
         }
     }
-    override func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?) {
+    override func touchesCancelled(touches: Set<UITouch>, withEvent event: UIEvent?) {
         if !blockTouches{
             super.touchesCancelled(touches, withEvent: event)
         }

@@ -12,7 +12,7 @@ class Document: NSObject {
     
     var created: NSDate?
     var docDescription: String?
-    var id: Int?
+    var id: String?
     var name: String?
     var type: Int? // file type
     var uploaderId: Int?
@@ -32,7 +32,7 @@ class Document: NSObject {
             self.docDescription = val
         }
         
-        if let val = dictionary["id"] as? Int {
+        if let val = dictionary["id"] as? String {
             self.id = val
         }
         

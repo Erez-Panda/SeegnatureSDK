@@ -48,7 +48,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     var preLoadedImages = Array<Document>()
     var currentImage: UIImage?
     var currentImageUrl: String?
-    var currentDocument = 0
+    var currentDocument = ""
     var currentPage = 0
     var modifiedImages: Dictionary<String, UIImage?> = [:]
     
@@ -208,7 +208,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
                 if self.resources?.count > 0{
                     if let resource = self.resources?[index]{
                         if (resource["type"] as! NSNumber == 1){
-                            if let resourceId = resource["id"] as? NSNumber {
+                            if let resourceId = resource["id"] as? String {
                                 isChangingPresentation = true
                                 activity.startAnimating()
                                 ServerAPI.sharedInstance.getResourceDisplay(resourceId, completion: { (result) -> Void in
@@ -278,7 +278,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             let data = ["page": scopeIndex,
                 "document": self.getSelectedResourceId(scopeSelectedResIndex),
                 "url": result as String] as Dictionary<String, AnyObject>
-            let documentId = self.getSelectedResourceId(scopeSelectedResIndex) as Int
+            let documentId = self.getSelectedResourceId(scopeSelectedResIndex) as String
             CallUtils.sendJsonMessage("preload_res_with_index", data: data)
             if url != nil {
                 self.fileSelector.getDataFromUrl(url!) { data in
@@ -479,18 +479,18 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     }
     
     
-    func getSelectedResourceId() ->NSNumber{
-        if let id = self.resources?[selectedResIndex]["id"] as? NSNumber{
+    func getSelectedResourceId() ->String{
+        if let id = self.resources?[selectedResIndex]["id"] as? String{
             return id
         }
-        return selectedResIndex
+        return ""
     }
     
-    func getSelectedResourceId(index: Int) ->NSNumber{
-        if let id = self.resources?[index]["id"] as? NSNumber{
+    func getSelectedResourceId(index: Int) ->String{
+        if let id = self.resources?[index]["id"] as? String{
             return id
         }
-        return selectedResIndex
+        return ""
     }
     
     // only rep
@@ -542,7 +542,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     }
     
     func setSignView() {
-        self.signView = NSBundle(forClass: SessionView.self).loadNibNamed("SignDocumentPanelView", owner: self, options: nil)[0] as? SignDocumentPanelView
+        self.signView = NSBundle(forClass: SessionView.self).loadNibNamed("SignDocumentPanelView", owner: self, options: nil)![0] as? SignDocumentPanelView
         self.signView?.onClose = self.onSignViewClose
         self.signView?.onSign = self.onSignViewSign
         self.addSubview(self.signView!)
@@ -555,7 +555,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     }
     
     func setTextBox() {
-        addTextView = NSBundle(forClass: SessionView.self).loadNibNamed("TextDocumentPanelView", owner: self, options: nil)[0] as? TextDocumentPanelView
+        addTextView = NSBundle(forClass: SessionView.self).loadNibNamed("TextDocumentPanelView", owner: self, options: nil)![0] as? TextDocumentPanelView
         addTextView?.onClose = onTextViewClose
         addTextView?.onAdd = onTextAdded
         self.addSubview(addTextView!)
@@ -703,8 +703,8 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     }
     
     @IBAction func deleteChanges(sender: AnyObject) {
-        let callId = CallUtils.currentCall!["id"] as! Int
-        let documentId = self.preLoadedImages[currentDocument].id!
+        let callId = CallUtils.currentCall!["id"] as! String
+        let documentId = self.preLoadedImages[selectedResIndex].id!
         let page = currentPage
         if let url = getCurrentPage(page)?.url {
             let newDictionary: Dictionary<String, AnyObject>  = ["callId": callId, "document": documentId, "page": page, "url": url]
@@ -939,7 +939,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         self.isDragging = false
     }
     
-    override func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?) {
+    override func touchesCancelled(touches: Set<UITouch>, withEvent event: UIEvent?) {
         super.touchesCancelled(touches, withEvent: event)
         print("CANCEL", terminator: "")
     }
@@ -980,14 +980,22 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         CallUtils.publisher?.publishVideo = true
         
         ViewUtils.getTopViewController()!.dismissViewControllerAnimated(true, completion: { () -> Void in
-            if let id = CallUtils.currentCall?["id"] as? NSNumber{
+            if let id = CallUtils.currentCall?["id"] as? String{
                 let newName = "\(id)_Id_Image.jpg"
                 showSpinner("Uploading file")
-                ServerAPI.sharedInstance.uploadFile(UIImageJPEGRepresentation(image, 1.0)!, filename: newName) { (result) -> Void in
+                ServerAPI.sharedInstance.uploadFile(UIImageJPEGRepresentation(image, 1.0)!, filename: newName, call: id) { (result) -> Void in
                     hideSpinner()
-                    if let file = result as? NSDictionary{
-                        if let fileId = file["id"] as? NSNumber {
-                            let newDictionary: Dictionary<String, AnyObject>  = ["file": fileId, "verify_id": true, "type": 1, "name": newName]
+                    if let response = result as? NSDictionary{
+                        if let fileId = response["file"] as? NSNumber {
+                            let newDictionary: Dictionary<String, AnyObject>  = [
+                                "file": fileId,
+                                "verify_id": true,
+                                "type": 1,
+                                "assigned_call_resource": response["assigned_call_resource"] as! String,
+                                "file_descriptor": response["file_descriptor"] as! String,
+                                "id": response["id"] as! String,
+                                "uuid": response["uuid"] as! String,
+                                "name": newName]
                             CallUtils.sendJsonMessage("new_call_document", data: newDictionary)
                             print("sent message")
                         }
@@ -1018,7 +1026,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             })
         } else {
             
-            let chatView = NSBundle(forClass: SessionView.self).loadNibNamed("ChatView", owner: self, options: nil)[0] as! ChatView
+            let chatView = NSBundle(forClass: SessionView.self).loadNibNamed("ChatView", owner: self, options: nil)![0] as! ChatView
             
             chatView.attachToView(self)
             self.chat = chatView
@@ -1139,7 +1147,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         
         if let pub = CallUtils.publisher?.view {
             let snapshot = pub.snapshotViewAfterScreenUpdates(true)
-            userImage = takeScreenshot(snapshot)
+            userImage = takeScreenshot(snapshot!)
         }
         
         let scaledSignView = PassiveLinearInterpView(frame: CGRectMake(0,0,signatureView.frame.width*scaleRatio/zoom, signatureView.frame.height*scaleRatio/zoom))
@@ -1172,7 +1180,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         
         let signedDoc = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        let image: UIImage = signedDoc
+        let image: UIImage = signedDoc!
         self.presentaionImage?.image = image
         if currentImageUrl != nil {
             modifiedImages[currentImageUrl!] = image
@@ -1180,7 +1188,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         
         setImageAtIndex(image, document: currentDocument, page: currentPage)
 
-        newDictionary["call"] = CallUtils.currentCall!["id"] as! NSNumber
+        newDictionary["call"] = CallUtils.currentCall!["id"] as! String
         newDictionary["page_number"] = self.currentPage
         newDictionary["document_id"] = self.currentDocument
         newDictionary["tracking"] = randomStringWithLength(16)
@@ -1251,7 +1259,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         scaledTextImage.drawInRect(CGRectMake((X*scaleRatio)-widthDiff/2,(Y*scaleRatio)-heightDiff/2,scaledTextView.frame.width, scaledTextView.frame.height))
         let addedTextDoc = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        let image: UIImage = addedTextDoc
+        let image: UIImage = addedTextDoc!
         self.presentaionImage?.image = image
         if currentImageUrl != nil {
             modifiedImages[currentImageUrl!] = image
@@ -1483,7 +1491,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
 
     func handleCleanPage(string: String) {
         if let data = CallUtils.convertStringToDictionary(string) {
-            let document = getDocumentById(data["document"] as! Int)
+            let document = getDocumentById(data["document"] as! String)
             let page = getPageByIndex(document, index: data["page"] as! Int)
             if let val = page?.url {
                 setImageFromURL(val, document: document.id!, page: page!.index!, completion: { (result) -> Void in
@@ -1763,7 +1771,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         
         if let data = CallUtils.convertStringToDictionary(string) {
 
-            currentDocument = data["document"] as! Int
+            currentDocument = data["document"] as! String
             currentPage = data["page"] as! Int
             if let image = getImageAtIndex(currentDocument, page: currentPage){
                 dispatch_async(dispatch_get_main_queue()){
@@ -1782,8 +1790,8 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     func preLoadResourcesWithIndex(string: String) {
         if string.isEmpty == false {
             if let data = CallUtils.convertStringToDictionary(string) {
-                if getImageAtIndex(data["document"] as! Int, page: data["page"] as! Int) == nil {
-                    setImageFromURL(data["url"] as! String, document: data["document"] as! Int, page: data["page"] as! Int, completion: nil)
+                if getImageAtIndex(data["document"] as! String, page: data["page"] as! Int) == nil {
+                    setImageFromURL(data["url"] as! String, document: data["document"] as! String, page: data["page"] as! Int, completion: nil)
                 }
             }
         }
@@ -1927,14 +1935,14 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     // MARK: set image methods
     
     // client only
-    func setImageAtIndex(image: UIImage, document: Int, page: Int){
+    func setImageAtIndex(image: UIImage, document: String, page: Int){
         let doc = getDocumentById(document)
         if let page = getPageByIndex(doc, index: page) {
             page.image = image
         }
     }
     
-    func setImageFromURL(urlPath: String, document: Int, page: Int, completion: ((result: UIImage) -> Void)?) -> Void{
+    func setImageFromURL(urlPath: String, document: String, page: Int, completion: ((result: UIImage) -> Void)?) -> Void{
         if let url = NSURL(string: urlPath){
             NetworkUtils.getDataFromUrl(url) { data in
                 if let image = UIImage(data: data!){
@@ -1945,7 +1953,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         }
     }
     
-    func getImageAtIndex(document: Int, page: Int) -> UIImage?{
+    func getImageAtIndex(document: String, page: Int) -> UIImage?{
         let doc = self.getDocumentById(document)
         if let page = getPageByIndex(doc, index: page) {
             return page.image
@@ -1988,7 +1996,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         view.layer.renderInContext(UIGraphicsGetCurrentContext()!)
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        return image
+        return image!
     }
     
     func drawObjectOnDocument(document:UIImage, data: [String:AnyObject], newViewFrame: CGRect, newImage: UIImage) {
@@ -2001,7 +2009,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         newImage.drawInRect(CGRectMake((x*document.size.width),(y*document.size.height),newViewFrame.width, newViewFrame.height))
         let signedDoc = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        let image: UIImage = signedDoc
+        let image: UIImage = signedDoc!
         self.presentaionImage?.image = image
         
 //        if currentPage != nil && currentDocument != nil {
@@ -2029,7 +2037,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         }
     }
     
-    func getDocumentById(id: Int) -> Document {
+    func getDocumentById(id: String) -> Document {
         for doc in self.preLoadedImages {
             if doc.id == id {
                 return doc
@@ -2046,7 +2054,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         return doc
     }
     
-    func addPageToDocument(docId: Int, pageIndex: Int, image: UIImage, url: String, pageId: Int? = nil) {
+    func addPageToDocument(docId: String, pageIndex: Int, image: UIImage, url: String, pageId: Int? = nil) {
         let doc = self.getDocumentById(docId)
         for page in doc.pages {
             if page.index == pageIndex {

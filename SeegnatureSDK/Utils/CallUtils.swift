@@ -14,6 +14,8 @@
 import OpenTok
 
 let ApiKey = "45145512"
+//let ApiKey = "45635572" // Preview
+
 
 @objc protocol CallDelegate{
     optional func remoteSideConnected()

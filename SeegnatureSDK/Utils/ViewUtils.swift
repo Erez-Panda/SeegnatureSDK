@@ -123,10 +123,10 @@ struct ViewUtils {
     }
     
     static func getBlurEffect(view:UIView) -> UIImage{
-        let snapshotView:UIView = view.snapshotViewAfterScreenUpdates(true)
+        let snapshotView:UIView = view.snapshotViewAfterScreenUpdates(true)!
         UIGraphicsBeginImageContextWithOptions(view.bounds.size, true, 0.0)
         snapshotView.drawViewHierarchyInRect(view.bounds, afterScreenUpdates: true)
-        let imgaa :UIImage = UIGraphicsGetImageFromCurrentImageContext();
+        let imgaa :UIImage = UIGraphicsGetImageFromCurrentImageContext()!;
         
         let ciimage :CIImage = CIImage(image: imgaa)!
         let filter : CIFilter = CIFilter(name:"CIGaussianBlur")!
@@ -221,7 +221,7 @@ struct ViewUtils {
         if let image = ViewUtils.loadUIImageNamed("back_btn") {
             backBtn.setBackgroundImage(image, forState: UIControlState.Normal)
         }
-        backBtn.addTarget(vc, action: "back", forControlEvents: UIControlEvents.TouchUpInside)
+        backBtn.addTarget(vc, action: Selector("back"), forControlEvents: UIControlEvents.TouchUpInside)
         let backButton = UIBarButtonItem(customView: backBtn)
         backButton.tag = 10
         vc.navigationItem.leftBarButtonItem = backButton
@@ -236,7 +236,7 @@ struct ViewUtils {
         if let image = ViewUtils.loadUIImageNamed("menu_btn") {
             menuBtn.setBackgroundImage(image, forState: UIControlState.Normal)
         }
-        menuBtn.addTarget(vc, action: "menu", forControlEvents: UIControlEvents.TouchUpInside)
+        menuBtn.addTarget(vc, action: Selector("menu"), forControlEvents: UIControlEvents.TouchUpInside)
         let menuButton = UIBarButtonItem(customView: menuBtn)
         menuButton.tag = 10
         vc.navigationItem.rightBarButtonItem = menuButton
