@@ -613,7 +613,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
             if let view = CallUtils.screenSubscriber?.view {
                 self.addSubview(view)
                 let screenSize: CGRect = UIScreen.mainScreen().bounds
-                let ratio = CallUtils.subscriber!.stream.videoDimensions.height/CallUtils.subscriber!.stream.videoDimensions.width
+                let ratio = CallUtils.screenSubscriber!.stream.videoDimensions.height/CallUtils.screenSubscriber!.stream.videoDimensions.width
                 view.addSizeConstaints(screenSize.width, height: screenSize.width*ratio)
                 view.setConstraintesToCenterSuperView(self)
             }
@@ -1280,7 +1280,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         
         CallUtils.sendJsonMessage("add_text", data: newDictionary)
         
-        newDictionary["call"] = CallUtils.currentCall!["id"] as! NSNumber
+        newDictionary["call"] = CallUtils.currentCall!["id"] as! String
         newDictionary["page_number"] = self.currentPage
         newDictionary["document_id"] = self.currentDocument
         newDictionary["tracking"] = randomStringWithLength(16)
