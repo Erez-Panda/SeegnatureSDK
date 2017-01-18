@@ -90,7 +90,7 @@ class ChatView: UIView, UITextFieldDelegate {
     func sendMessageToRemote(message: String){
         if message != "" {
             var maybeError : OTError?
-            CallUtils.session?.signalWithType("chat_text", string: message, connection: nil, error: &maybeError)
+            CallUtils.session?.signalWithType("chat_text", string: message, connection: CallUtils.remoteConnection!, error: &maybeError)
             addChatBox(chatText.text!, isSelf: true)
         }
     }

@@ -37,7 +37,14 @@ typedef NS_ENUM(NSInteger, OTCameraCaptureResolution) {
 
 /**
  * Defines values for the <code>cameraFrameRate</code> parameter of the
- * <[OTPublisher initWithDelegate:name:cameraResolution:cameraFrameRate:]> method.
+ * <[OTPublisher initWithDelegate:name:cameraResolution:cameraFrameRate:]>
+ * method.
+ *
+ * Note that in sessions that use the OpenTok Media Router (sessions with the
+ * [media mode](http://tokbox.com/opentok/tutorials/create-session/#media-mode)
+ * set to routed), lowering the frame rate proportionally reduces the bandwidth
+ * the stream uses. However, in sessions that have the media mode set to
+ * relayed, lowering the frame rate does not reduce the stream's bandwidth.
  */
 typedef NS_ENUM(NSInteger, OTCameraCaptureFrameRate) {
     /**
@@ -59,6 +66,49 @@ typedef NS_ENUM(NSInteger, OTCameraCaptureFrameRate) {
 };
 
 /**
+ * Defines settings to be used when initializing a publisher using the
+ * <[OTPublisher initWithDelegate:settings:]> method.
+ *
+ * This includes settings for the resolution and the frame rate of the
+ * publisher's video, in addition to settings inherited from the
+ * <OTPublisherKitSettings> class.
+ *
+ * For sessions that use [the OpenTok Media
+ * Router](https://tokbox.com/developer/guides/create-session/#media-mode )
+ * (sessions with the media mode set to routed), lowering the frame
+ * rate or lowering the resolution reduces the maximum bandwidth the stream can
+ * use. However, in sessions with the media mode set to relayed, lowering the
+ * frame rate or resolution may not reduce the stream's bandwidth.
+ */
+@interface OTPublisherSettings : OTPublisherKitSettings
+
+/** @name Defining publisher settings */
+
+/**
+ * The resolution of the published video. Set this to a value defined in the
+ * <OTCameraCaptureResolution> enum. The default resolution is
+ * `OTCameraCaptureResolutionMedium`.
+ */
+@property(nonatomic) OTCameraCaptureResolution cameraResolution;
+
+/**
+ * The frame rate of the published video. Set this to a value defined in the
+ * <OTCameraCaptureFrameRate> enum. If the device does not support the specified
+ * frame rate, it will set the frame rate to 30 frames per second.
+ *
+ * Note that in sessions that use the OpenTok Media Router (sessions with the
+ * [media mode](https://tokbox.com/developer/guides/create-session/#media-mode)
+ * set to routed), lowering the frame rate proportionally reduces the bandwidth
+ * the stream uses. However, in sessions that have the media mode set to
+ * relayed, lowering the frame rate does not reduce the stream's bandwidth.
+ *
+ * The default frame rate is `OTCameraCaptureFrameRate20FPS`.
+ */
+@property(nonatomic) OTCameraCaptureFrameRate cameraFrameRate;
+
+@end
+
+/**
  * A publisher captures an audio-video stream from the device's microphone and 
  * camera. You can then publish the audio-video stream to an OpenTok session by
  * sending the <[OTSession publish:error:]> message.
@@ -66,17 +116,43 @@ typedef NS_ENUM(NSInteger, OTCameraCaptureFrameRate) {
  * The OpenTok iOS SDK supports publishing on all multi-core iOS devices.
  * See "Developer and client requirements" in the README file for the
  * [OpenTok iOS SDK](http://tokbox.com/opentok/libraries/client/ios ).
+ *
+ * Note that when testing in the iOS Simulator, an OTPublisher object uses
+ * a demo video, since the camera is not available in the Simulator.
  */
 @interface OTPublisher : OTPublisherKit
 
 /** @name Initializing a publisher */
 
 /**
+ * Initialize the publisher with settings defined by an
+ * <OTPublisherSettings> object.
+ *
+ * @param delegate The delegate (<OTPublisherKitDelegate>) object for the
+ * publisher.
+ *
+ * @param settings The (<OTPublisherSettings>) object that defines settings for
+ * the publisher.
+ */
+-(nonnull instancetype)initWithDelegate:(nullable id<OTPublisherKitDelegate>)delegate
+                       settings:(nonnull OTPublisherSettings *)settings;
+
+/**
  * Initialize a Publisher object.
+ *
+ * This method is deprecated. Use <[OTPublisher initWithDelegate:settings:]>
+ * instead.
  *
  * This method includes parameters for setting the resolution and the frame rate of the
  * publisher's video. If you use an initializer method inherited from <OTPublisherKit>, the
  * resolution will be VGA, and the frame rate will be 30 frames per second.
+ *
+ * For sessions that use [the OpenTok Media
+ * Router](http://tokbox.com/opentok/tutorials/create-session/#media-mode )
+ * (sessions with the media mode set to routed), lowering the frame
+ * rate or lowering the resolution reduces the maximum bandwidth the stream can
+ * use. However, in sessions with the media mode set to relayed, lowering the
+ * frame rate or resolution may not reduce the stream's bandwidth.
  *
  * @param delegate The delegate (<OTPublisherKitDelegate>) object for the
  * publisher.
@@ -84,18 +160,24 @@ typedef NS_ENUM(NSInteger, OTCameraCaptureFrameRate) {
  * @param name The name to appear at the bottom of the video.
  *
  * @param cameraResolution The resolution of the published video. Set this to a value defined in the
- *            <OTCameraCaptureResolution> enum.
+ * <OTCameraCaptureResolution> enum.
  *
  * @param cameraFrameRate The frame rate of the published video. Set this to a value defined in the
- *            <OTCameraCaptureFrameRate> enum. If the device does not support the specified
- *            frame rate, it will set the frame rate to 30 frames per second.
+ * <OTCameraCaptureFrameRate> enum. If the device does not support the specified
+ * frame rate, it will set the frame rate to 30 frames per second.
+ * Note that in sessions that use the OpenTok Media Router (sessions with the
+ * [media mode](http://tokbox.com/opentok/tutorials/create-session/#media-mode)
+ * set to routed), lowering the frame rate proportionally reduces the bandwidth
+ * the stream uses. However, in sessions that have the media mode set to
+ * relayed, lowering the frame rate does not reduce the stream's bandwidth.
  *
  * @return The pointer to the instance, or `nil` if initialization failed.
  */
--(instancetype)initWithDelegate:(id<OTPublisherKitDelegate>)delegate
-                           name:(NSString*)name
-               cameraResolution:(OTCameraCaptureResolution)cameraResolution
-                cameraFrameRate:(OTCameraCaptureFrameRate)cameraFrameRate;
+-(nonnull instancetype)initWithDelegate:(nullable id<OTPublisherKitDelegate>)delegate
+                                   name:(nullable NSString*)name
+                       cameraResolution:(OTCameraCaptureResolution)cameraResolution
+                        cameraFrameRate:(OTCameraCaptureFrameRate)cameraFrameRate __attribute((deprecated(("Use initWithDelegate: settings: instead"))));
+
 
 /** @name Displaying the video */
 
@@ -103,7 +185,7 @@ typedef NS_ENUM(NSInteger, OTCameraCaptureFrameRate) {
  * The view for this publisher. If this view becomes visible, it will
  * display a preview of the active camera feed.
  */
-@property(readonly) UIView* view;
+@property(readonly) UIView* _Nonnull view;
 
 /**
 * The scaling of the rendered video, as defined by the
@@ -141,7 +223,7 @@ typedef NS_ENUM(NSInteger, OTCameraCaptureFrameRate) {
  * @param publisher The publisher that signalled this event.
  * @param position The position of the new camera.
  */
--(void)publisher:(OTPublisher*)publisher
+-(void)publisher:(nonnull OTPublisher*)publisher
 didChangeCameraPosition:(AVCaptureDevicePosition)position;
 
 

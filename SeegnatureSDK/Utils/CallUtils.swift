@@ -46,6 +46,7 @@ struct CallUtils{
     static var isConnectedToSession: Bool = false
     static var connectionCallback: ((result: Bool) -> Void)?
     static var callerImage: UIImage?
+    static var remoteConnection: OTConnection?
     
     static func fakeCall (){
         isFakeCall = true
@@ -156,7 +157,7 @@ struct CallUtils{
     static func doConnect() {
         if let session = self.session {
             var maybeError : OTError?
-            session.connectWithToken(self.token, error: &maybeError)
+            session.connectWithToken(self.token!, error: &maybeError)
             if let error = maybeError {
                 ViewUtils.showAlert("OTError", message: error.localizedDescription)
             } else {
@@ -180,7 +181,7 @@ struct CallUtils{
         publisher = OTPublisher(delegate: self.publisherDelegate)
         publisher?.publishVideo = true
         var maybeError : OTError?
-        session?.publish(publisher, error: &maybeError)
+        session?.publish(publisher!, error: &maybeError)
         
         if let error = maybeError {
             printLog("OTError \(error.localizedDescription)")
@@ -193,7 +194,7 @@ struct CallUtils{
         screenPublisher?.videoCapture = TBScreenCapture(view: view)
         //screenPublisher?.publishVideo = true
         var maybeError : OTError?
-        session?.publish(screenPublisher, error: &maybeError)
+        session?.publish(screenPublisher!, error: &maybeError)
         
         if let error = maybeError {
             printLog("OTError \(error.localizedDescription)")
@@ -206,7 +207,7 @@ struct CallUtils{
         if let session = self.session {
             screenSubscriber = OTSubscriber(stream: stream, delegate: self.subscriberDelegate)
             var maybeError : OTError?
-            session.subscribe(screenSubscriber, error: &maybeError)
+            session.subscribe(screenSubscriber!, error: &maybeError)
             if let error = maybeError {
                 printLog("OTError \(error.localizedDescription)")
             }
@@ -236,7 +237,7 @@ struct CallUtils{
         if let session = self.session {
             subscriber = OTSubscriber(stream: stream, delegate: self.subscriberDelegate)
             var maybeError : OTError?
-            session.subscribe(subscriber, error: &maybeError)
+            session.subscribe(subscriber!, error: &maybeError)
             if let error = maybeError {
                 printLog("OTError \(error.localizedDescription)")
             }
@@ -289,7 +290,7 @@ struct CallUtils{
         var maybeError : OTError?
         do{
             let jsonData = try NSJSONSerialization.dataWithJSONObject(data, options: NSJSONWritingOptions())
-            self.session?.signalWithType(type, string: NSString(data: jsonData, encoding: NSUTF8StringEncoding)! as String, connection: nil, error: &maybeError)
+            self.session?.signalWithType(type, string: NSString(data: jsonData, encoding: NSUTF8StringEncoding)! as String, connection: self.remoteConnection!, error: &maybeError)
         }
         catch{
             printLog("error")

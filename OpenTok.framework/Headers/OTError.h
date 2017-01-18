@@ -137,6 +137,13 @@ typedef NS_ENUM(int32_t, OTSubscriberErrorCode) {
 
 /**
  * Defines errors for the OpenTok iOS SDK.
+ *
+ * See the documentation for the following constant enumerations, which define
+ * the code values for OTError objects:
+ *
+ * * <OTPublisherErrorCode>
+ * * <OTSessionErrorCode>
+ * * <OTSubscriberErrorCode>
  */
 @interface OTError : NSError
 

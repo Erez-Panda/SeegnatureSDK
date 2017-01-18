@@ -6,6 +6,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreMedia/CMTime.h>
+#import <CoreGraphics/CoreGraphics.h>
 
 /**
  * Defines values for video orientations (up, down, left, right) for the
@@ -36,6 +37,23 @@ typedef NS_ENUM(int32_t, OTPixelFormat) {
 };
 
 /**
+ * Defines values for the <[OTSubscriber viewScaleBehavior]> and
+ * <[OTPublisher viewScaleBehavior]> methods.
+ */
+typedef NS_ENUM(NSInteger, OTVideoViewScaleBehavior) {
+    /**
+     * The video shrinks, as needed, so that the entire video is visible
+     * with pillarboxing.
+     */
+    OTVideoViewScaleBehaviorFit,
+    /**
+     * The video scales to fill the entire area of the renderer, with cropping
+     * as needed.
+     */
+    OTVideoViewScaleBehaviorFill,
+};
+
+/**
  * Defines the video format assigned to an instance of an <OTVideoFrame> object.
  */
 @interface OTVideoFormat : NSObject
@@ -43,7 +61,7 @@ typedef NS_ENUM(int32_t, OTPixelFormat) {
 /**
  * The name you assign to the video format
  */
-@property(nonatomic, copy) NSString* name;
+@property(nonatomic, copy) NSString* _Nonnull name;
 /**
  * The pixel format. Valid values are defined in the <OTPixelFormat> enum.
  */
@@ -51,7 +69,7 @@ typedef NS_ENUM(int32_t, OTPixelFormat) {
 /**
  * The number of bytes per row of the video.
  */
-@property(nonatomic, retain) NSMutableArray* bytesPerRow;
+@property(nonatomic, retain) NSMutableArray* _Nonnull bytesPerRow;
 /**
  * The width of the video, in pixels.
  */
@@ -69,11 +87,15 @@ typedef NS_ENUM(int32_t, OTPixelFormat) {
  */
 @property(nonatomic, assign) double estimatedCaptureDelay;
 
-+ (OTVideoFormat*)videoFormatI420WithWidth:(uint32_t)width
-                                   height:(uint32_t)height;
++ (nonnull OTVideoFormat*)videoFormatI420WithWidth:(uint32_t)width
+                                            height:(uint32_t)height;
 
-+ (OTVideoFormat*)videoFormatNV12WithWidth:(uint32_t)width
-                                    height:(uint32_t)height;
++ (nonnull OTVideoFormat*)videoFormatNV12WithWidth:(uint32_t)width
+                                            height:(uint32_t)height;
+
++ (nonnull OTVideoFormat*)videoFormatARGBWithWidth:(uint32_t)width
+                                            height:(uint32_t)height;
+
 @end
 
 /**
@@ -87,7 +109,7 @@ typedef NS_ENUM(int32_t, OTPixelFormat) {
 /**
  * An array of planes in the video frame.
  */
-@property(nonatomic, retain) NSPointerArray* planes;
+@property(nonatomic, retain) NSPointerArray* _Nullable planes;
 /**
  * A timestap of the video frame.
  */
@@ -99,28 +121,28 @@ typedef NS_ENUM(int32_t, OTPixelFormat) {
 /**
  * The format of the video frame.
  */
-@property(nonatomic, retain) OTVideoFormat* format;
+@property(nonatomic, retain) OTVideoFormat* _Nonnull format;
 
 /** @name Instantiating OTVideoFrame objects */
 
 /**
  * Initializes an OTVideoFrame object.
  */
-- (id)init;
+- (nonnull id)init;
 
 /**
  * Initializes an OTVideoFrame object with a specified format.
  *
  * @param videoFormat The video format used by the video frame.
  */
-- (id)initWithFormat:(OTVideoFormat*)videoFormat;
+- (nonnull id)initWithFormat:(nonnull OTVideoFormat*)videoFormat;
 /**
  * Sets planes for the video frame.
  *
  * @param planes The planes to assign.
  * @param numPlanes The number of planes to assign.
  */
-- (void)setPlanesWithPointers:(uint8_t*[])planes numPlanes:(int)numPlanes;
+- (void)setPlanesWithPointers:(uint8_t* _Nonnull[])planes numPlanes:(int)numPlanes;
 /**
  * Cleans the planes in the video frame.
  */
@@ -137,7 +159,7 @@ typedef NS_ENUM(int32_t, OTPixelFormat) {
  *
  * @param frame The frame to consume.
  */
-- (void)consumeFrame:(OTVideoFrame*)frame;
+- (void)consumeFrame:(nonnull OTVideoFrame*)frame;
 
 @end
 
@@ -151,16 +173,16 @@ typedef NS_ENUM(int32_t, OTPixelFormat) {
  * The <OTVideoCaptureConsumer> object that consumes frames for the video
  * capturer.
  */
-@property(atomic, assign) id<OTVideoCaptureConsumer>videoCaptureConsumer;
+@property(atomic, assign) id<OTVideoCaptureConsumer> _Nullable videoCaptureConsumer;
 
 /**
  * Initializes the video capturer.
  */
-- (void)initCapture;
+- (void)initCapture NS_SWIFT_NAME(initCapture());
 /**
  * Releases the video capturer.
  */
-- (void)releaseCapture;
+- (void)releaseCapture NS_SWIFT_NAME(releaseCapture());
 /**
  * Starts capturing video.
  */
@@ -177,10 +199,9 @@ typedef NS_ENUM(int32_t, OTPixelFormat) {
  * The video format of the video capturer.
  * @param videoFormat The video format used.
  */
-- (int32_t)captureSettings:(OTVideoFormat*)videoFormat;
+- (int32_t)captureSettings:(nonnull OTVideoFormat*)videoFormat;
 
 @end
-
 
 /**
  * Defines a video renderer to be used by an <OTPublisherKit> object or an
@@ -194,6 +215,6 @@ typedef NS_ENUM(int32_t, OTPixelFormat) {
  *
  * @param frame The frame to render.
  */
-- (void)renderVideoFrame:(OTVideoFrame*) frame;
+- (void)renderVideoFrame:(nonnull OTVideoFrame*) frame;
 
 @end

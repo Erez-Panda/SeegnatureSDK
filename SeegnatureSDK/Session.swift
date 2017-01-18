@@ -103,7 +103,7 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
             self.sessionView.showDocumentImage()
         } else {
             self.sessionView.parentViewController?.navigationController?.navigationBarHidden = false
-            if CallUtils.subscriber?.stream.streamId == stream.streamId {
+            if CallUtils.subscriber?.stream!.streamId == stream.streamId {
                 //self.activeChatView.text = (self.activeChatView.text + "Remote side stopped video stream\n")
                 CallUtils.doUnsubscribe()
                 CallUtils.doUnpublish()
@@ -114,6 +114,7 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
     func session(session: OTSession, connectionCreated connection : OTConnection) {
         NSLog("session connectionCreated (\(connection.connectionId))")
         if connection.connectionId != CallUtils.session?.connection.connectionId {
+            CallUtils.remoteConnection = connection
             self.sessionView.remoteSideConnected()
             for (_, stream) in session.streams{
                 if let s = stream as? OTStream{
@@ -129,7 +130,7 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
             CallUtils.doScreenSubscribe(stream)
             self.sessionView.hideDocumentImage()
         // if it's not screen case it's camera
-        } else if CallUtils.subscriber?.stream.streamId != stream.streamId {
+        } else if CallUtils.subscriber?.stream!.streamId != stream.streamId {
             CallUtils.stream = stream
             CallUtils.doSubscribe(stream)
         } else {
@@ -154,7 +155,7 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
     }
     
     func subscriber(subscriber: OTSubscriberKit, didFailWithError error : OTError) {
-        NSLog("subscriber %@ didFailWithError %@", subscriber.stream.streamId, error)
+        NSLog("subscriber %@ didFailWithError %@", subscriber.stream!.streamId, error)
     }
     
     // MARK: - OTPublisher delegate callbacks
@@ -175,7 +176,7 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
     func publisher(publisher: OTPublisherKit, streamDestroyed stream: OTStream) {
         NSLog("publisher streamDestroyed %@", stream)
         
-        if CallUtils.subscriber?.stream.streamId == stream.streamId {
+        if CallUtils.subscriber?.stream!.streamId == stream.streamId {
             CallUtils.doUnsubscribe()
         }
     }
@@ -184,10 +185,9 @@ class Session: NSObject, OTSessionDelegate, OTSubscriberKitDelegate, OTPublisher
         NSLog("publisher didFailWithError %@", error)
     }
     
-    func session(session: OTSession!, receivedSignalType type: String!, fromConnection connection: OTConnection!, withString string: String!) {
+    func session(session: OTSession, receivedSignalType type: String, fromConnection connection: OTConnection, withString string: String) {
 
-        if ((connection?.connectionId != CallUtils.session?.connection?.connectionId) ||
-            (connection == nil) || (session == nil)) {
+        if ((connection.connectionId != CallUtils.session?.connection.connectionId)) {
 //        if (connection?.connectionId != CallUtils.session?.connection?.connectionId) {
             self.sessionView.handleSignal(session, receivedSignalType: type, fromConnection: connection, withString: string)
 

@@ -609,11 +609,11 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     
     func subscriberDidConnectToStream() {
         
-        if CallUtils.screenSubscriber?.stream.videoType == OTStreamVideoType.Screen {
+        if CallUtils.screenSubscriber?.stream!.videoType == OTStreamVideoType.Screen {
             if let view = CallUtils.screenSubscriber?.view {
                 self.addSubview(view)
                 let screenSize: CGRect = UIScreen.mainScreen().bounds
-                let ratio = CallUtils.screenSubscriber!.stream.videoDimensions.height/CallUtils.screenSubscriber!.stream.videoDimensions.width
+                let ratio = CallUtils.screenSubscriber!.stream!.videoDimensions.height/CallUtils.screenSubscriber!.stream!.videoDimensions.width
                 view.addSizeConstaints(screenSize.width, height: screenSize.width*ratio)
                 view.setConstraintesToCenterSuperView(self)
             }
@@ -758,7 +758,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         self.presentationWebView!.loadHTMLString(embedHTML, baseURL:nil)
         self.presentationWebView!.hidden = false
         var maybeError : OTError?
-        CallUtils.session?.signalWithType("load_video", string: url + "?autoplay=1&fs=1", connection: nil, error: &maybeError)
+        CallUtils.session?.signalWithType("load_video", string: url + "?autoplay=1&fs=1", connection: CallUtils.remoteConnection!, error: &maybeError)
     }
     
     @IBAction func lockDocument(sender: NIKFontAwesomeButton) {
@@ -782,7 +782,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
         CallUtils.doScreenUnpublish()
         self.presentationWebView?.hidden = true
         var maybeError : OTError?
-        CallUtils.session?.signalWithType("unload_video", string: "", connection: nil, error: &maybeError)
+        CallUtils.session?.signalWithType("unload_video", string: "", connection: CallUtils.remoteConnection!, error: &maybeError)
         self.presentationWebView?.loadHTMLString("", baseURL:nil)
     }
     
@@ -813,7 +813,7 @@ class SessionView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate, UI
     @IBAction func cleanDrawing(sender: AnyObject) {
         drawingView.cleanView()
         var maybeError : OTError?
-        CallUtils.session?.signalWithType("line_clear", string: "", connection: nil, error: &maybeError)
+        CallUtils.session?.signalWithType("line_clear", string: "", connection: CallUtils.remoteConnection!, error: &maybeError)
     }
     
     // MARK: - scrollview methods

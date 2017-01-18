@@ -87,14 +87,14 @@ typedef NS_ENUM(int32_t, OTSubscriberVideoEventReason) {
  * one and only one <OTSession> associated with it, and this property
  * is immutable.
  */
-@property(readonly) OTSession* session;
+@property(readonly) OTSession* _Nonnull session;
 
 /**
  * The stream this subscriber is bound to. Any media channels
  * on the stream should be available for display/playback with
  * this instance.
  */
-@property(readonly) OTStream* stream;
+@property(readonly) OTStream* _Nullable stream;
 
 /**
  * The <OTSubscriberKitDelegate> object that serves as a delegate,
@@ -103,7 +103,7 @@ typedef NS_ENUM(int32_t, OTSubscriberVideoEventReason) {
  * See also <[OTSubscriberKit audioLevelDelegate]> and
  * <[OTSubscriberKit networkStatsDelegate]>.
  */
-@property(nonatomic, assign) id<OTSubscriberKitDelegate> delegate;
+@property(nonatomic, assign) id<OTSubscriberKitDelegate> _Nullable delegate;
 
 /** @name Working with audio and video */
 
@@ -116,7 +116,7 @@ typedef NS_ENUM(int32_t, OTSubscriberVideoEventReason) {
  * If you do not set this property, the audio sampling subsystem is disabled.
  */
 @property (nonatomic, assign)
-id<OTSubscriberKitAudioLevelDelegate> audioLevelDelegate;
+id<OTSubscriberKitAudioLevelDelegate> _Nullable audioLevelDelegate;
 
 /**
  * Whether to subscribe to the stream's audio.
@@ -141,17 +141,19 @@ id<OTSubscriberKitAudioLevelDelegate> audioLevelDelegate;
 /**
  * The video renderer for this instance.
  */
-@property(nonatomic, retain) id<OTVideoRender> videoRender;
+@property(nonatomic, retain) id<OTVideoRender> _Nonnull videoRender;
 
 /**
- * The preferred resolution for the subscriber's stream. This property only
- * applies to streams published using the scalable video feature. The subscriber
- * will use the closest available resolution based on the CPU and bandwidth
- * constraints.
+ * The preferred resolution for the subscriber's stream. This method is part of
+ * the subscriber quality preference beta feature. For more information, see the
+ * [OpenTok Beta Programs page](https://tokbox.com/platform/beta-programs/).
  *
- * Scalable video is a beta feature. To participate in the beta program, see
- * the <a href="https://tokbox.com/platform/beta-programs">OpenTok Beta
- * programs</a> page.
+ * Limiting the video resolution and frame rate (see
+ * <[OTSubscriberKit preferredFrameRate]>) reduces the network and CPU usage
+ * on the subscribing client. You may want to use lower resolution based on the
+ * dimensions of subscriber's video in the app. You may want to use a lower
+ * frame rate or resolution for subscribers to a stream that is less important
+ * (and smaller) than other streams.
  *
  * Not every resolution is available to a subscriber. When you set the preferred
  * resolution, the OpenTok iOS SDK picks the best resolution available that
@@ -163,20 +165,22 @@ id<OTSubscriberKitAudioLevelDelegate> audioLevelDelegate;
 @property(nonatomic) CGSize preferredResolution;
 
 /**
- * The preferred frame rate for the subscriber's stream. This property only
- * applies to streams published using the scalable video feature. The subscriber
- * will use the closest available resolution based on the CPU and bandwidth
- * constraints.
+ * The preferred frame rate for the subscriber's stream. This method is part of
+ * the subscriber quality preference beta feature. For more information, see the
+ * [OpenTok Beta Programs page](https://tokbox.com/platform/beta-programs/).
  *
- * Scalable video is a beta feature. To participate in the beta program, see
- * the <a href="https://tokbox.com/platform/beta-programs">OpenTok Beta
- * programs</a> page.
+ * Limiting the frame rate and video resolution (see
+ * <[OTSubscriberKit preferredResolution]>) reduces the network and CPU usage
+ * on the subscribing client. You may want to use lower resolution based on the
+ * dimensions of subscriber's video in the app. You may want to use a lower
+ * frame rate or resolution for subscribers to a stream that is less important
+ * (and smaller) than other streams.
  *
  * The frame rates available are based on the value of the maximum frame rate
  * available for the stream. When you set the preferred frame rate for the
  * subscriber, the OpenTok iOS SDK picks the best frame rate available that is
- * closest to the `preferedFrameRate`, based on the client's bandwidth and CPU
- * constraints.
+ * closest to the `preferredFrameRate` setting, based on the client's bandwidth
+ * and CPU constraints.
  *
  * The actual frame rates available depend, dynamically, on network and CPU
  * resources available to the publisher.
@@ -199,7 +203,7 @@ id<OTSubscriberKitAudioLevelDelegate> audioLevelDelegate;
  * <[OTSubscriberKit delegate]> property (the OTSubscriberKitDelegate object).
  */
 @property (nonatomic, assign)
-id<OTSubscriberKitNetworkStatsDelegate> networkStatsDelegate;
+id<OTSubscriberKitNetworkStatsDelegate> _Nullable networkStatsDelegate;
 
 /** @name Initializing a Subscriber */
 
@@ -245,8 +249,8 @@ id<OTSubscriberKitNetworkStatsDelegate> networkStatsDelegate;
  * @param delegate The delegate (<OTSubscriberKitDelegate>) that will handle
  * events generated by this instance.
  */
-- (id)initWithStream:(OTStream*)stream
-            delegate:(id<OTSubscriberKitDelegate>)delegate;
+- (nonnull id)initWithStream:(nonnull OTStream*)stream
+                    delegate:(nullable id<OTSubscriberKitDelegate>)delegate;
 
 @end
 
@@ -263,7 +267,7 @@ id<OTSubscriberKitNetworkStatsDelegate> networkStatsDelegate;
  * Sent when the subscriber successfully connects to the stream.
  * @param subscriber The subscriber that generated this event.
  */
-- (void)subscriberDidConnectToStream:(OTSubscriberKit*)subscriber;
+- (void)subscriberDidConnectToStream:(nonnull OTSubscriberKit*)subscriber;
 
 /**
  * Sent if the subscriber fails to connect to its stream.
@@ -272,8 +276,8 @@ id<OTSubscriberKitNetworkStatsDelegate> networkStatsDelegate;
  * error. The `OTSubscriberErrorCode` enum (defined in the OTError class)
  * defines values for the `code` property of this object.
  */
-- (void)subscriber:(OTSubscriberKit*)subscriber
-  didFailWithError:(OTError*)error;
+- (void)subscriber:(nonnull OTSubscriberKit*)subscriber
+  didFailWithError:(nonnull OTError*)error;
 
 @optional
 
@@ -285,18 +289,19 @@ id<OTSubscriberKitNetworkStatsDelegate> networkStatsDelegate;
  * @param reason The reason that the video track was disabled. See
  * <OTSubscriberVideoEventReason>.
  */
-- (void)subscriberVideoDisabled:(OTSubscriberKit*)subscriber
+- (void)subscriberVideoDisabled:(nonnull OTSubscriberKit*)subscriber
                          reason:(OTSubscriberVideoEventReason)reason;
 
 /**
- * This message is sent when the subscriber starts (or resumes) receiving video.
+ * This message is sent when the subscriber's video stream starts (when there
+ * previously was no video) or resumes (after video was disabled).
  * Check the reason parameter for the reason why the video started (or resumed).
  *
- * @param subscriber The <OTSubscriber> that will no longer receive video.
+* @param subscriber The <OTSubscriber> that will receive video.
  * @param reason The reason that the video track was enabled. See
  * <OTSubscriberVideoEventReason>.
  */
-- (void)subscriberVideoEnabled:(OTSubscriberKit*)subscriber
+- (void)subscriberVideoEnabled:(nonnull OTSubscriberKit*)subscriber
                         reason:(OTSubscriberVideoEventReason)reason;
 
 /**
@@ -317,7 +322,7 @@ id<OTSubscriberKitNetworkStatsDelegate> networkStatsDelegate;
  *
  * @param subscriber The <OTSubscriber> that may stop receiving video soon.
  */
-- (void)subscriberVideoDisableWarning:(OTSubscriberKit*)subscriber;
+- (void)subscriberVideoDisableWarning:(nonnull OTSubscriberKit*)subscriber;
 
 /**
  * This message is sent when the OpenTok Media Router determines that the stream
@@ -335,7 +340,7 @@ id<OTSubscriberKitNetworkStatsDelegate> networkStatsDelegate;
  *
  * @param subscriber The <OTSubscriber> instance.
  */
-- (void)subscriberVideoDisableWarningLifted:(OTSubscriberKit*)subscriber;
+- (void)subscriberVideoDisableWarningLifted:(nonnull OTSubscriberKit*)subscriber;
 
 /**
  * Called when the subscriber's stream has been interrupted.
@@ -349,30 +354,20 @@ id<OTSubscriberKitNetworkStatsDelegate> networkStatsDelegate;
  * Otherwise, the <[OTSubscriberKitDelegate subscriberVideoDisabled:reason:]>
  * message is sent.
  *
- * This method is part of the automatic reconnection beta feature.
- * To participate in the beta program, see the
- * <a href="https://tokbox.com/platform/beta-programs">OpenTok Beta
- * programs</a> page.
- *
  * @param subscriber The subscriber that generated this event.
  */
-- (void)subscriberDidDisconnectFromStream:(OTSubscriberKit*)subscriber;
+- (void)subscriberDidDisconnectFromStream:(nonnull OTSubscriberKit*)subscriber;
 
 /**
  * Sent when the subscriber's stream has resumed, after the
  * <[OTSubscriberKitDelegate subscriberDidDisconnectFromStream:]> message
  * is sent.
  *
- * This method is part of the automatic reconnection beta feature.
- * To participate in the beta program, see the
- * <a href="https://tokbox.com/platform/beta-programs">OpenTok Beta
- * programs</a> page.
- *
  * @param subscriber The subscriber that generated this event.
  *
  * See <[OTSessionDelegate sessionDidReconnect:]>.
  */
-- (void)subscriberDidReconnectToStream:(OTSubscriberKit*)subscriber;
+- (void)subscriberDidReconnectToStream:(nonnull OTSubscriberKit*)subscriber;
 
 @end
 
@@ -389,7 +384,7 @@ id<OTSubscriberKitNetworkStatsDelegate> networkStatsDelegate;
  * Adjust this value logarithmically for use in a user interface
  * visualization of the volume (such as a volume meter).
  */
-- (void)subscriber:(OTSubscriberKit*)subscriber
+- (void)subscriber:(nonnull OTSubscriberKit*)subscriber
 audioLevelUpdated:(float)audioLevel;
 
 @end
@@ -411,8 +406,8 @@ audioLevelUpdated:(float)audioLevel;
  * properties for the video bytes received, video packets lost, and video
  * packets received for the subscriber.
  */
-- (void)subscriber:(OTSubscriberKit*)subscriber
-videoNetworkStatsUpdated:(OTSubscriberKitVideoNetworkStats*)stats;
+- (void)subscriber:(nonnull OTSubscriberKit*)subscriber
+videoNetworkStatsUpdated:(nonnull OTSubscriberKitVideoNetworkStats*)stats;
 
 /**
  * Sent periodically to report video statistics for the subscriber.
@@ -423,7 +418,7 @@ videoNetworkStatsUpdated:(OTSubscriberKitVideoNetworkStats*)stats;
  * properties for the audio bytes received, audio packets lost, and audio
  * packets received for the subscriber.
  */
-- (void)subscriber:(OTSubscriberKit*)subscriber
-audioNetworkStatsUpdated:(OTSubscriberKitAudioNetworkStats*)stats;
+- (void)subscriber:(nonnull OTSubscriberKit*)subscriber
+audioNetworkStatsUpdated:(nonnull OTSubscriberKitAudioNetworkStats*)stats;
 
 @end
